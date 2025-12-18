@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-
+// Changed CiCircleClose to CiCircleRemove
+import { CiMenuFries, CiLogin, CiCircleRemove } from "react-icons/ci"; 
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false); 
+  const [isOpen, setIsOpen] = useState(false);
 
   const navlinks = [
     { id: 1, name: "Home", path: "/" },
@@ -24,14 +25,25 @@ const Navbar = () => {
 
   return (
     <nav className="bg-[#0B2A4A] p-4 shadow-md sticky top-0 z-50">
-      <div className="flex justify-between items-center w-full max-w-7xl mx-auto">
+      <div className="grid grid-cols-3 lg:flex lg:justify-between items-center w-full max-w-7xl mx-auto">
         
-
-        <div className="flex-shrink-0">
-          <img src="/images/logo2.png" alt="Logo" className="h-12 md:h-16" />
+        {/* 1. Mobile Menu Toggle (Left) */}
+        <div className="flex items-center lg:hidden">
+          <button 
+            className="text-white text-3xl" // Increased size slightly for visibility
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {/* Using CiCircleRemove instead of CiCircleClose */}
+            {isOpen ? <CiCircleRemove /> : <CiMenuFries />}
+          </button>
         </div>
 
-        {/* 2. Desktop Navigation (Hidden on mobile) */}
+        {/* 2. Logo (Center on Mobile, Left on Desktop) */}
+        <div className="flex justify-center lg:justify-start lg:flex-shrink-0">
+          <img src="/images/logo2.png" alt="Logo" className="h-10 md:h-16" />
+        </div>
+
+        {/* 3. Desktop Links (Hidden on Mobile) */}
         <div className="hidden lg:flex flex-grow justify-center items-center space-x-2">
           {navlinks.map((item) => (
             <NavLink key={item.id} to={item.path} className={linkStyles}>
@@ -40,26 +52,16 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* 3. Desktop Language Button & Mobile Toggle */}
-        <div className="flex items-center space-x-4">
-          {/* Language Button (Visible on all screens) */}
-          <button className="flex items-center space-x-2 border border-gray-400 text-gray-700 py-1 px-3 rounded-full bg-white">
-            <span className="text-red-500 font-bold">+</span>
-            <span className="text-sm font-medium">En</span>
-            <span className="text-xs">▼</span>
-          </button>
-
-          {/* Mobile Hamburger Button (Visible only on mobile/tablet) */}
-          <button 
-            className="lg:hidden text-white" 
-            onClick={() => setIsOpen(!isOpen)}
-          >
-          {isOpen ? "Close" : "Menu"}
+        {/* 4. Login Icon (Right) */}
+        <div className="flex justify-end items-center">
+          <button className="text-white flex items-center space-x-1 hover:text-blue-400 transition">
+            <CiLogin className="text-2xl md:text-3xl" />
+            <span className="hidden sm:inline text-sm font-medium">Login</span>
           </button>
         </div>
       </div>
 
-      {/* 4. Mobile Menu Overlay */}
+      {/* 5. Mobile Menu Overlay */}
       {isOpen && (
         <div className="lg:hidden absolute top-full left-0 w-full bg-[#0B2A4A] border-t border-blue-900 z-50 flex flex-col p-4 space-y-2">
           {navlinks.map((item) => (
@@ -67,7 +69,7 @@ const Navbar = () => {
               key={item.id} 
               to={item.path} 
               className={linkStyles}
-              onClick={() => setIsOpen(false)} // Close menu when a link is clicked
+              onClick={() => setIsOpen(false)}
             >
               {item.name}
             </NavLink>

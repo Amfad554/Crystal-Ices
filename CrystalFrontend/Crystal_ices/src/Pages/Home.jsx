@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom"; // Added Link import
 import Layout from "../Shared/Layout/Layout";
 
 // --- IMAGE IMPORTS ---
@@ -51,7 +52,6 @@ const Home = () => {
             <span className="inline-block py-1 px-4 mb-6 text-xs font-bold tracking-[0.3em] text-blue-400 uppercase bg-blue-500/10 border border-blue-500/20 rounded-full">
               Lagos Premier Industrial Partner
             </span>
-            {/* Reduced from text-6xl to text-5xl for a cleaner professional look */}
             <h1 className="text-3xl md:text-5xl font-extrabold mb-6 leading-tight tracking-tight">
               End-to-end Consultancy & Procurement{" "}
               <br className="hidden md:block" />
@@ -64,12 +64,21 @@ const Home = () => {
             </p>
 
             <div className="flex flex-wrap justify-center gap-5 mb-16">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-xl active:scale-95">
+              {/* LINKED TO QUOTATION SECTION BELOW */}
+              <a 
+                href="#quotation-section"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center"
+              >
                 Request a Quote
-              </button>
-              <button className="border border-slate-700 text-slate-300 hover:bg-white hover:text-slate-900 px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all">
+              </a>
+              
+              {/* LINKED TO CATALOGUE PAGE */}
+              <Link 
+                to="/catalogue"
+                className="border border-slate-700 text-slate-300 hover:bg-white hover:text-slate-900 px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center"
+              >
                 View Equipment Catalogue
-              </button>
+              </Link>
             </div>
 
             {/* --- HERO SLIDER --- */}
@@ -270,8 +279,8 @@ const Home = () => {
           </div>
         </section>
 
-        {/* --- 6. PROFESSIONAL CONTACT SECTION --- */}
-        <section className="relative py-32 px-6 overflow-hidden">
+        {/* --- 6. PROFESSIONAL CONTACT SECTION (ID ADDED HERE) --- */}
+        <section id="quotation-section" className="relative py-32 px-6 overflow-hidden">
           <div className="absolute inset-0 z-0">
             <img
               src={slide3}
@@ -359,7 +368,6 @@ const Home = () => {
               Authorized Procurement & Support for Global Industry Leaders
             </p>
             <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
-              {/* These would ideally be SVG logos of brands like CAT, Komatsu, etc. */}
               <span className="text-xl font-black text-slate-900 italic">
                 CATERPILLAR
               </span>
