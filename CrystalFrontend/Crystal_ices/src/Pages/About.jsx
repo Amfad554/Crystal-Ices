@@ -1,14 +1,16 @@
-import Navbar from "../Shared/Navbar";
+import Layout from "../Shared/Layout/Layout";
+
 
 const About = () => {
-  return (
-    <div>
-      <Navbar />
-      <div className="bg-red-500 text-white">
+    return ( 
+        <div>
+           <Layout>
+            <div className="bg-red-500 text-white min-h-screen">
         <p>about page</p>
       </div>
-    </div>
-  );
-};
-
+           </Layout>
+        </div>
+     );
+}
+ 
 export default About;

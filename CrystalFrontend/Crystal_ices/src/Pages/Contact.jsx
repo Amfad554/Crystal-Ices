@@ -1,12 +1,14 @@
-import Navbar from "../Shared/Navbar";
+import Layout from "../Shared/Layout/Layout";
+
 
 const Contact = () => {
     return ( 
         <div>
-          <Navbar />
-            <div className="bg-blue-950 text-white">
+          <Layout>
+            <div className="bg-blue-950 text-white min-h-screen">
         <p>Contact page</p>
       </div>
+      </Layout>
         </div>
      );
 }

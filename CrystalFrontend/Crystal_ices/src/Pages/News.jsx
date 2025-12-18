@@ -1,12 +1,14 @@
-import Navbar from "../Shared/Navbar";
+import Layout from "../Shared/Layout/Layout";
+
 
 const News = () => {
     return (  
         <div>
-            <Navbar />
-            <div className="bg-black text-white">
+           <Layout>
+            <div className="bg-black text-white min-h-screen">
         <p>News page</p>
       </div>
+      </Layout>
         </div>
     );
 }
