@@ -1,15 +1,385 @@
+import { useState, useEffect } from "react";
 import Layout from "../Shared/Layout/Layout";
 
+// --- IMAGE IMPORTS ---
+import slide1 from "/images/oil.jpg";
+import slide2 from "/images/machine.jpg";
+import slide3 from "/images/refinary2.jpg";
+import slide4 from "/images/construction2.avif";
 
 const Home = () => {
+  const sliderData = [
+    {
+      img: slide1,
+      title: "Energy Solutions",
+      desc: "Strategic procurement for oil & gas facilities.",
+    },
+    {
+      img: slide2,
+      title: "Heavy Machinery",
+      desc: "Top-tier excavators and plant equipment leasing.",
+    },
+    {
+      img: slide3,
+      title: "Refining Excellence",
+      desc: "Consultancy for modern refinery operations.",
+    },
+    {
+      img: slide4,
+      title: "Infrastructure",
+      desc: "Building the future of industrial real estate.",
+    },
+  ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) =>
+        prev === sliderData.length - 1 ? 0 : prev + 1
+      );
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [sliderData.length]);
+
   return (
-    <div>
-      <Layout>
-      <div className="bg-blue-400 text-white min-h-screen">
-        <p>home page</p>
-      </div>
-      </Layout>
-    </div>
+    <Layout>
+      <main className="min-h-screen font-sans text-slate-900 bg-white">
+        {/* --- 1. HERO SECTION --- */}
+        <section className="pt-24 pb-20 bg-slate-900 text-white px-6">
+          <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
+            <span className="inline-block py-1 px-4 mb-6 text-xs font-bold tracking-[0.3em] text-blue-400 uppercase bg-blue-500/10 border border-blue-500/20 rounded-full">
+              Lagos Premier Industrial Partner
+            </span>
+            {/* Reduced from text-6xl to text-5xl for a cleaner professional look */}
+            <h1 className="text-3xl md:text-5xl font-extrabold mb-6 leading-tight tracking-tight">
+              End-to-end Consultancy & Procurement{" "}
+              <br className="hidden md:block" />
+              for Energy & Heavy Machinery
+            </h1>
+            <p className="text-base md:text-lg text-slate-400 max-w-2xl mb-10 leading-relaxed">
+              From pump stations and jetties to specialized excavators and
+              industrial real estate. We combine local Lagos expertise with
+              global supply chains.
+            </p>
+
+            <div className="flex flex-wrap justify-center gap-5 mb-16">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-xl active:scale-95">
+                Request a Quote
+              </button>
+              <button className="border border-slate-700 text-slate-300 hover:bg-white hover:text-slate-900 px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all">
+                View Equipment Catalogue
+              </button>
+            </div>
+
+            {/* --- HERO SLIDER --- */}
+            <div className="relative w-full max-w-6xl h-[400px] md:h-[600px] rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10">
+              {sliderData.map((slide, index) => (
+                <div
+                  key={index}
+                  className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                    index === currentSlide
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 scale-105"
+                  }`}
+                >
+                  <img
+                    src={slide.img}
+                    alt={slide.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent flex flex-col justify-end p-8 md:p-20 text-left">
+                    <h3 className="text-2xl md:text-4xl font-bold mb-3">
+                      {slide.title}
+                    </h3>
+                    <p className="text-sm md:text-lg text-slate-300 max-w-xl opacity-90">
+                      {slide.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              <div className="absolute bottom-10 right-10 flex gap-3 z-20">
+                {sliderData.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentSlide(i)}
+                    className={`h-1.5 transition-all rounded-full ${
+                      i === currentSlide
+                        ? "w-12 bg-blue-500"
+                        : "w-4 bg-white/30"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* --- 2. EQUIPMENT QUICK SEARCH --- */}
+        <div className="relative z-30 -mt-12 px-6">
+          <div className="max-w-5xl mx-auto bg-white shadow-2xl rounded-2xl p-4 md:p-6 border border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase ml-2">
+                Keywords
+              </label>
+              <input
+                type="text"
+                placeholder="Search machinery..."
+                className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase ml-2">
+                Category
+              </label>
+              <select className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-slate-500 text-sm">
+                <option>All Equipment</option>
+                <option>Excavators</option>
+                <option>Cranes</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase ml-2">
+                Region
+              </label>
+              <select className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-slate-500 text-sm">
+                <option>Lagos Mainland</option>
+                <option>Lagos Island</option>
+              </select>
+            </div>
+            <button className="bg-slate-900 hover:bg-blue-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest mt-auto mb-1 h-[48px] transition-all">
+              Search Now
+            </button>
+          </div>
+        </div>
+
+        {/* --- 3. TRUST BAR --- */}
+        <div className="bg-white py-16">
+          <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12">
+            {[
+              { label: "Compliance", val: "Registered in Nigeria" },
+              { label: "Quality", val: "ISO-Ready Processes" },
+              { label: "Timeline", val: "Fast Turnaround" },
+              { label: "Support", val: "Local Lagos Presence" },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="flex flex-col border-l-2 border-blue-600 pl-6"
+              >
+                <span className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em] mb-1">
+                  {item.label}
+                </span>
+                <span className="text-lg font-bold text-slate-800">
+                  {item.val}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* --- 4. SERVICES TILES --- */}
+        <section className="py-24 px-6 bg-slate-50">
+          <div className="max-w-7xl mx-auto text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">Our Core Expertise</h2>
+            <div className="w-20 h-1.5 bg-blue-600 mx-auto rounded-full"></div>
+          </div>
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                title: "Consultancy",
+                icon: "📊",
+                desc: "Technical guidance on energy infrastructure.",
+              },
+              {
+                title: "Oil & Gas",
+                icon: "⛽",
+                desc: "Managing pump stations and jetty terminals.",
+              },
+              {
+                title: "Heavy Machinery",
+                icon: "🏗️",
+                desc: "Strategic procurement of plant equipment.",
+              },
+              {
+                title: "Real Estate",
+                icon: "🏠",
+                desc: "Industrial and residential development.",
+              },
+            ].map((service, idx) => (
+              <div
+                key={idx}
+                className="p-10 border border-white rounded-[2rem] hover:shadow-2xl transition-all duration-500 bg-white group cursor-default"
+              >
+                <div className="text-5xl mb-8 group-hover:scale-110 transition-transform">
+                  {service.icon}
+                </div>
+                <h3 className="font-bold text-xl mb-4 text-slate-800">
+                  {service.title}
+                </h3>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  {service.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* --- 5. FEATURED PROJECTS --- */}
+        <section className="py-24 px-6 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-end mb-12">
+              <h2 className="text-3xl font-bold text-slate-900">
+                Featured Projects
+              </h2>
+              <button className="text-blue-600 font-bold text-sm uppercase tracking-widest border-b-2 border-blue-600 pb-1">
+                All Projects
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "Refinery Logistics",
+                  tags: "Oil & Gas",
+                  result: "30% Efficiency Boost",
+                },
+                {
+                  title: "Jetty Infrastructure",
+                  tags: "Maritime",
+                  result: "Safety Compliant",
+                },
+                {
+                  title: "Machinery Fleet",
+                  tags: "Construction",
+                  result: "24-Hour Deployment",
+                },
+              ].map((project, i) => (
+                <div
+                  key={i}
+                  className="group relative h-80 rounded-3xl overflow-hidden bg-slate-100 border border-slate-200 p-8 flex flex-col justify-end hover:shadow-xl transition-all cursor-pointer"
+                >
+                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2">
+                    {project.tags}
+                  </span>
+                  <h4 className="text-xl font-bold text-slate-900 mb-1">
+                    {project.title}
+                  </h4>
+                  <p className="text-sm text-slate-500">{project.result}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* --- 6. PROFESSIONAL CONTACT SECTION --- */}
+        <section className="relative py-32 px-6 overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <img
+              src={slide3}
+              alt="Background"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-900/70"></div>
+          </div>
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
+            <div className="text-white">
+              <span className="inline-block py-1 px-3 mb-6 text-xs font-bold tracking-[0.2em] text-blue-400 uppercase bg-blue-500/10 border border-blue-500/20 rounded-full">
+                Direct Technical Channel
+              </span>
+              <h2 className="text-4xl md:text-5xl font-bold mb-8 tracking-tight leading-tight">
+                Request a Professional <br />{" "}
+                <span className="text-blue-400">Quotation</span>
+              </h2>
+              <p className="text-slate-300 text-lg mb-12 max-w-lg leading-relaxed">
+                Our engineering team provides technical procurement plans within
+                24 hours.
+              </p>
+              <div className="space-y-6">
+                {[
+                  "Official Lagos Registered Entity",
+                  "Global Supply Chain Partnerships",
+                  "Strict ISO-Ready Compliance",
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-4 group">
+                    <div className="w-6 h-6 rounded-full bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                      <span className="text-sm font-bold">✓</span>
+                    </div>
+                    <span className="text-slate-200 font-medium tracking-wide">
+                      {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* FORM CONTAINER */}
+            <div className="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold text-slate-900">
+                  Inquiry Portal
+                </h3>
+                <p className="text-slate-500 text-sm">
+                  Please fill out technical fields.
+                </p>
+              </div>
+              <form className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+                  />
+                </div>
+                <select className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none text-sm text-slate-500">
+                  <option>Heavy Machinery Procurement</option>
+                  <option>Oil & Gas Consultancy</option>
+                </select>
+                <textarea
+                  placeholder="Technical Requirements..."
+                  rows="3"
+                  className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none resize-none text-sm"
+                ></textarea>
+                <button className="w-full bg-slate-900 hover:bg-blue-600 text-white py-5 rounded-xl font-bold uppercase tracking-widest text-[11px] transition-all shadow-xl flex items-center justify-center gap-3">
+                  Submit Official Inquiry <span>→</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        {/* --- 7. PARTNERS & BRANDS SECTION --- */}
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-6">
+            <p className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-12">
+              Authorized Procurement & Support for Global Industry Leaders
+            </p>
+            <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+              {/* These would ideally be SVG logos of brands like CAT, Komatsu, etc. */}
+              <span className="text-xl font-black text-slate-900 italic">
+                CATERPILLAR
+              </span>
+              <span className="text-xl font-black text-slate-900 italic">
+                KOMATSU
+              </span>
+              <span className="text-xl font-black text-slate-900 italic">
+                HYUNDAI
+              </span>
+              <span className="text-xl font-black text-slate-900 italic">
+                TOTAL
+              </span>
+              <span className="text-xl font-black text-slate-900 italic">
+                SHELL
+              </span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </Layout>
   );
 };
 
