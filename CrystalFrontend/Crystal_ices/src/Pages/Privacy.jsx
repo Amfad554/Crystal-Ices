@@ -1,12 +1,14 @@
-import Navbar from "../Shared/Navbar";
+import Layout from "../Shared/Layout/Layout";
+
 
 const Privacy = () => {
     return ( 
         <div>
-          <Navbar />
-            <div className="bg-gray-600 text-white">
+          <Layout>
+            <div className="bg-gray-600 text-white min-h-screen">
         <p>Privacy page</p>
       </div>
+      </Layout>
         </div>
      );
 }
