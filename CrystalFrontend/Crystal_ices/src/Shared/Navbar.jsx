@@ -23,7 +23,7 @@ const Navbar = () => {
       : "text-gray-200 p-2 hover:text-white transition duration-75 text-sm";
 
   return (
-    <nav className="bg-[#0B2A4A] p-4 shadow-md relative">
+    <nav className="bg-[#0B2A4A] p-4 shadow-md sticky top-0 z-50">
       <div className="flex justify-between items-center w-full max-w-7xl mx-auto">
         
 
