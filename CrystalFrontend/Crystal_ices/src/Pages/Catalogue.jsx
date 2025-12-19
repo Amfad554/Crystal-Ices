@@ -1,8 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Added useEffect
+import { useSearchParams } from "react-router-dom"; // Added this hook
 import Layout from "../Shared/Layout/Layout";
 
 const Catalogue = () => {
+  const [searchParams] = useSearchParams();
   const [filter, setFilter] = useState("All");
+
+  // --- LOGIC: Sync Filter with URL Parameters ---
+  useEffect(() => {
+    const categoryParam = searchParams.get("cat");
+    // eslint-disable-next-line no-unused-vars
+    const queryParam = searchParams.get("query");
+
+    if (categoryParam) {
+      // Map Home page categories to Catalogue categories
+      if (categoryParam === "Excavators" || categoryParam === "Cranes") {
+        setFilter("Heavy Duty");
+      } else if (categoryParam === "All Equipment") {
+        setFilter("All");
+      } else {
+        setFilter(categoryParam);
+      }
+    }
+  }, [searchParams]);
 
   const equipment = [
     {
@@ -61,15 +81,21 @@ const Catalogue = () => {
     },
   ];
 
-  const filteredItems =
-    filter === "All"
-      ? equipment
-      : equipment.filter((e) => e.category === filter);
+  // Logic to handle both Category filter AND Search query text
+  const filteredItems = equipment.filter((item) => {
+    const matchesFilter = filter === "All" || item.category === filter;
+    const query = searchParams.get("query")?.toLowerCase() || "";
+    const matchesQuery =
+      item.name.toLowerCase().includes(query) ||
+      item.purpose.toLowerCase().includes(query);
+
+    return matchesFilter && matchesQuery;
+  });
 
   return (
     <Layout>
       <div className="bg-white min-h-screen">
-        {/* Header */}
+        {/* Header - Identical to yours */}
         <section className="bg-[#0B2A4A] py-20 px-6 text-white border-b-4 border-[#00A3A3]">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-end">
             <div>
@@ -78,14 +104,15 @@ const Catalogue = () => {
               </h1>
               <p className="text-gray-400 max-w-xl">
                 Certified industrial machinery and oil & gas infrastructure
-                components available for immediate deployment.
+                components.
               </p>
             </div>
-            <div className="mt-8 md:mt-0">
-              <span className="text-xs font-bold tracking-widest text-[#00A3A3] uppercase">
-                Crystal Ices Assets
-              </span>
-            </div>
+            {/* Show an active search indicator if coming from Home */}
+            {searchParams.get("query") && (
+              <div className="bg-[#00A3A3]/20 border border-[#00A3A3] p-2 rounded text-xs">
+                Showing results for: "{searchParams.get("query")}"
+              </div>
+            )}
           </div>
         </section>
 
@@ -109,71 +136,57 @@ const Catalogue = () => {
 
           {/* Catalogue Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {filteredItems.map((item) => (
-              <div
-                key={item.id}
-                className="group border border-gray-200 hover:border-[#00A3A3] transition-all duration-500"
-              >
-                <div className="aspect-video bg-gray-50 flex items-center justify-center text-6xl group-hover:bg-[#0B2A4A] group-hover:text-white transition-all duration-500">
-                  {item.icon}
-                </div>
-
-                <div className="p-8">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-[10px] font-black text-[#00A3A3] uppercase">
-                      {item.category}
-                    </span>
-                    <span className="text-[10px] font-bold text-gray-400 italic">
-                      {item.availability}
-                    </span>
+            {filteredItems.length > 0 ? (
+              filteredItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="group border border-gray-200 hover:border-[#00A3A3] transition-all duration-500"
+                >
+                  <div className="aspect-video bg-gray-50 flex items-center justify-center text-6xl group-hover:bg-[#0B2A4A] group-hover:text-white transition-all duration-500">
+                    {item.icon}
                   </div>
-
-                  <h3 className="text-xl font-bold text-[#0B2A4A] mb-4 uppercase tracking-tight">
-                    {item.name}
-                  </h3>
-
-                  <div className="space-y-3 mb-8">
-                    <div className="flex justify-between text-sm border-b border-gray-50 pb-2">
-                      <span className="text-gray-400 uppercase text-[10px] font-bold">
-                        Specifications
+                  <div className="p-8">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-[10px] font-black text-[#00A3A3] uppercase">
+                        {item.category}
                       </span>
-                      <span className="text-gray-700 font-medium">
-                        {item.specs}
+                      <span className="text-[10px] font-bold text-gray-400 italic">
+                        {item.availability}
                       </span>
                     </div>
-                    <div className="flex justify-between text-sm border-b border-gray-100 pb-2">
-                      <span className="text-gray-400 uppercase text-[10px] font-bold">
-                        Primary Use
-                      </span>
-                      <span className="text-gray-700 font-medium">
-                        {item.purpose}
-                      </span>
+                    <h3 className="text-xl font-bold text-[#0B2A4A] mb-4 uppercase tracking-tight">
+                      {item.name}
+                    </h3>
+                    <div className="space-y-3 mb-8">
+                      <div className="flex justify-between text-sm border-b border-gray-50 pb-2">
+                        <span className="text-gray-400 uppercase text-[10px] font-bold">
+                          Specifications
+                        </span>
+                        <span className="text-gray-700 font-medium">
+                          {item.specs}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm border-b border-gray-100 pb-2">
+                        <span className="text-gray-400 uppercase text-[10px] font-bold">
+                          Primary Use
+                        </span>
+                        <span className="text-gray-700 font-medium">
+                          {item.purpose}
+                        </span>
+                      </div>
                     </div>
+                    <button className="w-full bg-white border-2 border-[#0B2A4A] text-[#0B2A4A] py-3 font-bold text-xs uppercase tracking-widest hover:bg-[#0B2A4A] hover:text-white transition-all">
+                      Request Quote / Inspect
+                    </button>
                   </div>
-
-                  <button className="w-full bg-white border-2 border-[#0B2A4A] text-[#0B2A4A] py-3 font-bold text-xs uppercase tracking-widest hover:bg-[#0B2A4A] hover:text-white transition-all">
-                    Request Quote / Inspect
-                  </button>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-full py-20 text-center text-gray-400">
+                No equipment found matching your criteria.
               </div>
-            ))}
+            )}
           </div>
-        </section>
-
-        {/* Technical Support Banner */}
-        <section className="my-20 bg-gray-50 p-12 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between border-l-8 border-[#00A3A3]">
-          <div className="mb-6 md:mb-0">
-            <h2 className="text-2xl font-bold text-[#0B2A4A]">
-              Need Custom Sourcing?
-            </h2>
-            <p className="text-gray-500">
-              We can procure specialized equipment outside our current stock
-              through our global network.
-            </p>
-          </div>
-          <button className="bg-[#00A3A3] text-white px-8 py-4 font-bold text-xs uppercase tracking-widest hover:shadow-xl transition-all">
-            Contact Procurement Team
-          </button>
         </section>
       </div>
     </Layout>
