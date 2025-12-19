@@ -54,10 +54,10 @@ const Navbar = () => {
 
         {/* 4. Login Icon (Right) */}
         <div className="flex justify-end items-center">
-          <button className="text-white flex items-center space-x-1 hover:text-blue-400 transition">
+          <NavLink to="/auth" className="text-white flex items-center space-x-1 hover:text-blue-400 transition">
             <CiLogin className="text-2xl md:text-3xl" />
             <span className="hidden sm:inline text-sm font-medium">Login</span>
-          </button>
+          </NavLink>
         </div>
       </div>
 

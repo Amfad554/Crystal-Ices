@@ -13,6 +13,7 @@ import News from './Pages/News.jsx';
 import Careers from './Pages/Careers.jsx';
 import Privacy from './Pages/Privacy.jsx';
 import Services from './Pages/Services.jsx';
+import Auth from './Pages/Auth.jsx';
 
 
 const router = createBrowserRouter([
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
       {
         path: "/privacy",
         element: <Privacy />,
+      },
+      {
+        path: "/auth",
+        element: <Auth/>,
       },
     ],
   },
