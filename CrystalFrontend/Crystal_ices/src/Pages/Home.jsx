@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom"; // Added Link import
+import { Link, useNavigate } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
 
 // --- IMAGE IMPORTS ---
@@ -9,6 +9,24 @@ import slide3 from "/images/refinary2.jpg";
 import slide4 from "/images/construction2.avif";
 
 const Home = () => {
+  const navigate = useNavigate();
+
+  // --- 1. STATE FOR FUNCTIONALITY ---
+  const [searchQuery, setSearchQuery] = useState({
+    keyword: "",
+    category: "All Equipment",
+    region: "Lagos Mainland"
+  });
+
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    service: "Heavy Machinery Procurement",
+    requirements: ""
+  });
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
   const sliderData = [
     {
       img: slide1,
@@ -32,8 +50,7 @@ const Home = () => {
     },
   ];
 
-  const [currentSlide, setCurrentSlide] = useState(0);
-
+  // --- 2. EFFECTS & HANDLERS ---
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) =>
@@ -42,6 +59,23 @@ const Home = () => {
     }, 5000);
     return () => clearInterval(timer);
   }, [sliderData.length]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams({
+      query: searchQuery.keyword,
+      cat: searchQuery.category,
+      loc: searchQuery.region
+    }).toString();
+    navigate(`/catalogue?${params}`);
+  };
+
+  const handleInquiry = async (e) => {
+    e.preventDefault();
+    console.log("Submitting Inquiry:", formData);
+    alert("Thank you! Your technical inquiry has been sent. Our team will contact you within 24 hours.");
+    setFormData({ fullName: "", email: "", service: "Heavy Machinery Procurement", requirements: "" });
+  };
 
   return (
     <Layout>
@@ -64,15 +98,12 @@ const Home = () => {
             </p>
 
             <div className="flex flex-wrap justify-center gap-5 mb-16">
-              {/* LINKED TO QUOTATION SECTION BELOW */}
               <a 
                 href="#quotation-section"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center"
               >
                 Request a Quote
               </a>
-              
-              {/* LINKED TO CATALOGUE PAGE */}
               <Link 
                 to="/catalogue"
                 className="border border-slate-700 text-slate-300 hover:bg-white hover:text-slate-900 px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center"
@@ -126,7 +157,7 @@ const Home = () => {
 
         {/* --- 2. EQUIPMENT QUICK SEARCH --- */}
         <div className="relative z-30 -mt-12 px-6">
-          <div className="max-w-5xl mx-auto bg-white shadow-2xl rounded-2xl p-4 md:p-6 border border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <form onSubmit={handleSearch} className="max-w-5xl mx-auto bg-white shadow-2xl rounded-2xl p-4 md:p-6 border border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase ml-2">
                 Keywords
@@ -135,13 +166,19 @@ const Home = () => {
                 type="text"
                 placeholder="Search machinery..."
                 className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+                value={searchQuery.keyword}
+                onChange={(e) => setSearchQuery({...searchQuery, keyword: e.target.value})}
               />
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase ml-2">
                 Category
               </label>
-              <select className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-slate-500 text-sm">
+              <select 
+                className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-slate-500 text-sm"
+                value={searchQuery.category}
+                onChange={(e) => setSearchQuery({...searchQuery, category: e.target.value})}
+              >
                 <option>All Equipment</option>
                 <option>Excavators</option>
                 <option>Cranes</option>
@@ -151,18 +188,22 @@ const Home = () => {
               <label className="text-[10px] font-bold text-slate-400 uppercase ml-2">
                 Region
               </label>
-              <select className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-slate-500 text-sm">
+              <select 
+                className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-slate-500 text-sm"
+                value={searchQuery.region}
+                onChange={(e) => setSearchQuery({...searchQuery, region: e.target.value})}
+              >
                 <option>Lagos Mainland</option>
                 <option>Lagos Island</option>
               </select>
             </div>
-            <button className="bg-slate-900 hover:bg-blue-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest mt-auto mb-1 h-[48px] transition-all">
+            <button type="submit" className="bg-slate-900 hover:bg-blue-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest mt-auto mb-1 h-[48px] transition-all">
               Search Now
             </button>
-          </div>
+          </form>
         </div>
 
-        {/* --- 3. TRUST BAR --- */}
+        {/* --- 3. TRUST BAR (RESTORED) --- */}
         <div className="bg-white py-16">
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12">
             {[
@@ -186,7 +227,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* --- 4. SERVICES TILES --- */}
+        {/* --- 4. SERVICES TILES (RESTORED) --- */}
         <section className="py-24 px-6 bg-slate-50">
           <div className="max-w-7xl mx-auto text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Our Core Expertise</h2>
@@ -194,26 +235,10 @@ const Home = () => {
           </div>
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              {
-                title: "Consultancy",
-                icon: "📊",
-                desc: "Technical guidance on energy infrastructure.",
-              },
-              {
-                title: "Oil & Gas",
-                icon: "⛽",
-                desc: "Managing pump stations and jetty terminals.",
-              },
-              {
-                title: "Heavy Machinery",
-                icon: "🏗️",
-                desc: "Strategic procurement of plant equipment.",
-              },
-              {
-                title: "Real Estate",
-                icon: "🏠",
-                desc: "Industrial and residential development.",
-              },
+              { title: "Consultancy", icon: "📊", desc: "Technical guidance on energy infrastructure." },
+              { title: "Oil & Gas", icon: "⛽", desc: "Managing pump stations and jetty terminals." },
+              { title: "Heavy Machinery", icon: "🏗️", desc: "Strategic procurement of plant equipment." },
+              { title: "Real Estate", icon: "🏠", desc: "Industrial and residential development." },
             ].map((service, idx) => (
               <div
                 key={idx}
@@ -233,34 +258,20 @@ const Home = () => {
           </div>
         </section>
 
-        {/* --- 5. FEATURED PROJECTS --- */}
+        {/* --- 5. FEATURED PROJECTS (RESTORED) --- */}
         <section className="py-24 px-6 bg-white">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-end mb-12">
-              <h2 className="text-3xl font-bold text-slate-900">
-                Featured Projects
-              </h2>
+              <h2 className="text-3xl font-bold text-slate-900">Featured Projects</h2>
               <button className="text-blue-600 font-bold text-sm uppercase tracking-widest border-b-2 border-blue-600 pb-1">
                 All Projects
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
-                {
-                  title: "Refinery Logistics",
-                  tags: "Oil & Gas",
-                  result: "30% Efficiency Boost",
-                },
-                {
-                  title: "Jetty Infrastructure",
-                  tags: "Maritime",
-                  result: "Safety Compliant",
-                },
-                {
-                  title: "Machinery Fleet",
-                  tags: "Construction",
-                  result: "24-Hour Deployment",
-                },
+                { title: "Refinery Logistics", tags: "Oil & Gas", result: "30% Efficiency Boost" },
+                { title: "Jetty Infrastructure", tags: "Maritime", result: "Safety Compliant" },
+                { title: "Machinery Fleet", tags: "Construction", result: "24-Hour Deployment" },
               ].map((project, i) => (
                 <div
                   key={i}
@@ -279,14 +290,10 @@ const Home = () => {
           </div>
         </section>
 
-        {/* --- 6. PROFESSIONAL CONTACT SECTION (ID ADDED HERE) --- */}
+        {/* --- 6. PROFESSIONAL CONTACT SECTION --- */}
         <section id="quotation-section" className="relative py-32 px-6 overflow-hidden">
           <div className="absolute inset-0 z-0">
-            <img
-              src={slide3}
-              alt="Background"
-              className="w-full h-full object-cover"
-            />
+            <img src={slide3} alt="Background" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-900/70"></div>
           </div>
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
@@ -299,8 +306,7 @@ const Home = () => {
                 <span className="text-blue-400">Quotation</span>
               </h2>
               <p className="text-slate-300 text-lg mb-12 max-w-lg leading-relaxed">
-                Our engineering team provides technical procurement plans within
-                24 hours.
+                Our engineering team provides technical procurement plans within 24 hours.
               </p>
               <div className="space-y-6">
                 {[
@@ -312,48 +318,54 @@ const Home = () => {
                     <div className="w-6 h-6 rounded-full bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
                       <span className="text-sm font-bold">✓</span>
                     </div>
-                    <span className="text-slate-200 font-medium tracking-wide">
-                      {item}
-                    </span>
+                    <span className="text-slate-200 font-medium tracking-wide">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* FORM CONTAINER */}
             <div className="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
               <div className="mb-8">
-                <h3 className="text-2xl font-bold text-slate-900">
-                  Inquiry Portal
-                </h3>
-                <p className="text-slate-500 text-sm">
-                  Please fill out technical fields.
-                </p>
+                <h3 className="text-2xl font-bold text-slate-900">Inquiry Portal</h3>
+                <p className="text-slate-500 text-sm">Please fill out technical fields.</p>
               </div>
-              <form className="space-y-5">
+              <form onSubmit={handleInquiry} className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <input
+                    required
                     type="text"
                     placeholder="Full Name"
                     className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                   />
                   <input
+                    required
                     type="email"
                     placeholder="Email Address"
                     className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
                   />
                 </div>
-                <select className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none text-sm text-slate-500">
+                <select 
+                  className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none text-sm text-slate-500"
+                  value={formData.service}
+                  onChange={(e) => setFormData({...formData, service: e.target.value})}
+                >
                   <option>Heavy Machinery Procurement</option>
                   <option>Oil & Gas Consultancy</option>
                 </select>
                 <textarea
+                  required
                   placeholder="Technical Requirements..."
                   rows="3"
                   className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none resize-none text-sm"
+                  value={formData.requirements}
+                  onChange={(e) => setFormData({...formData, requirements: e.target.value})}
                 ></textarea>
-                <button className="w-full bg-slate-900 hover:bg-blue-600 text-white py-5 rounded-xl font-bold uppercase tracking-widest text-[11px] transition-all shadow-xl flex items-center justify-center gap-3">
+                <button type="submit" className="w-full bg-slate-900 hover:bg-blue-600 text-white py-5 rounded-xl font-bold uppercase tracking-widest text-[11px] transition-all shadow-xl flex items-center justify-center gap-3">
                   Submit Official Inquiry <span>→</span>
                 </button>
               </form>
@@ -361,28 +373,18 @@ const Home = () => {
           </div>
         </section>
 
-        {/* --- 7. PARTNERS & BRANDS SECTION --- */}
+        {/* --- 7. PARTNERS & BRANDS (RESTORED) --- */}
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-6">
             <p className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-12">
               Authorized Procurement & Support for Global Industry Leaders
             </p>
             <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
-              <span className="text-xl font-black text-slate-900 italic">
-                CATERPILLAR
-              </span>
-              <span className="text-xl font-black text-slate-900 italic">
-                KOMATSU
-              </span>
-              <span className="text-xl font-black text-slate-900 italic">
-                HYUNDAI
-              </span>
-              <span className="text-xl font-black text-slate-900 italic">
-                TOTAL
-              </span>
-              <span className="text-xl font-black text-slate-900 italic">
-                SHELL
-              </span>
+              <span className="text-xl font-black text-slate-900 italic">CATERPILLAR</span>
+              <span className="text-xl font-black text-slate-900 italic">KOMATSU</span>
+              <span className="text-xl font-black text-slate-900 italic">HYUNDAI</span>
+              <span className="text-xl font-black text-slate-900 italic">TOTAL</span>
+              <span className="text-xl font-black text-slate-900 italic">SHELL</span>
             </div>
           </div>
         </section>
