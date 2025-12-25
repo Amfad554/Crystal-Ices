@@ -14,6 +14,8 @@ import Careers from './Pages/Careers.jsx';
 import Privacy from './Pages/Privacy.jsx';
 import Services from './Pages/Services.jsx';
 import Auth from './Pages/Auth.jsx';
+import Dashboard from './Pages/Dashboard.jsx';
+import VerifyEmail from './Pages/VerifyEmail.jsx';
 
 
 const router = createBrowserRouter([
@@ -60,6 +62,14 @@ const router = createBrowserRouter([
       {
         path: "/auth",
         element: <Auth/>,
+      },
+       {
+        path: "/dashboard",
+        element: <Dashboard/>,
+      },
+      {
+        path: "/verifyemail/:token",
+        element: <VerifyEmail/>,
       },
     ],
   },
