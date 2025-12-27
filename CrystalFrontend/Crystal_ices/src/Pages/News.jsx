@@ -1,6 +1,42 @@
+import { useState } from "react"; 
 import Layout from "../Shared/Layout/Layout";
 
+// --- CENTRALIZED API CONFIG ---
+const BASE_URL = "https://crystalbackend.onrender.com";
+
 const News = () => {
+  // 2. Setup state for email and loading status
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // 3. Updated submit handler with Render URL
+  const handleJoin = async (e) => {
+    e.preventDefault();
+    if (!email) return alert("Please enter an email address");
+
+    setLoading(true);
+    try {
+      // Updated to use the live Render BASE_URL
+      const res = await fetch(`${BASE_URL}/api/users/newsletter-subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Success! You've joined our newsletter.");
+        setEmail("");
+      } else {
+        alert(data.message || "Something went wrong.");
+      }
+    } catch (err) {
+      alert("Failed to connect to the server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const articles = [
     {
       id: 1,
@@ -102,16 +138,24 @@ const News = () => {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-2xl font-bold text-white mb-4">Subscribe to our Industry Insights</h2>
             <p className="text-gray-400 mb-8 text-sm">Get the latest project updates and energy sector news delivered to your inbox.</p>
-            <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+            
+            <form onSubmit={handleJoin} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
               <input 
+                required
                 type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email" 
                 className="flex-1 px-6 py-3 rounded-none focus:outline-none text-black" 
               />
-              <button className="bg-[#00A3A3] text-white px-8 py-3 font-bold uppercase text-xs tracking-widest hover:bg-teal-600 transition-colors">
-                Join
+              <button 
+                disabled={loading}
+                type="submit"
+                className="bg-[#00A3A3] text-white px-8 py-3 font-bold uppercase text-xs tracking-widest hover:bg-teal-600 transition-colors disabled:opacity-50"
+              >
+                {loading ? "Joining..." : "Join"}
               </button>
-            </div>
+            </form>
           </div>
         </section>
       </div>

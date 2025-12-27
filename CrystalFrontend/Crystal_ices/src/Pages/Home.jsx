@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
 
+// --- CENTRALIZED API CONFIG ---
+const BASE_URL = "https://crystalbackend.onrender.com";
+
 // --- IMAGE IMPORTS ---
 import slide1 from "/images/oil.jpg";
 import slide2 from "/images/machine.jpg";
@@ -11,7 +14,7 @@ import slide4 from "/images/construction2.avif";
 const Home = () => {
   const navigate = useNavigate();
 
-  // --- 1. STATE FOR FUNCTIONALITY ---
+  // --- 1. STATE MANAGEMENT ---
   const [searchQuery, setSearchQuery] = useState({
     keyword: "",
     category: "All Equipment",
@@ -25,8 +28,11 @@ const Home = () => {
     requirements: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // --- 2. DATA ARRAYS ---
   const sliderData = [
     {
       img: slide1,
@@ -50,7 +56,6 @@ const Home = () => {
     },
   ];
 
-  // --- STAFF DATA ---
   const staffMembers = [
     {
       name: "Engr. Adebayo Benson",
@@ -78,7 +83,7 @@ const Home = () => {
     },
   ];
 
-  // --- 2. EFFECTS & HANDLERS ---
+  // --- 3. EFFECTS & HANDLERS ---
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) =>
@@ -100,16 +105,42 @@ const Home = () => {
 
   const handleInquiry = async (e) => {
     e.preventDefault();
-    console.log("Submitting Inquiry:", formData);
-    alert(
-      "Thank you! Your technical inquiry has been sent. Our team will contact you within 24 hours."
-    );
-    setFormData({
-      fullName: "",
-      email: "",
-      service: "Heavy Machinery Procurement",
-      requirements: "",
-    });
+    setLoading(true);
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const payload = {
+      ...formData,
+      userId: user ? user.id : null,
+    };
+
+    try {
+      // Updated to use the live Render BASE_URL
+      const response = await fetch(`${BASE_URL}/api/inquiry/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setSubmitted(true);
+        setFormData({
+          fullName: "",
+          email: "",
+          service: "Heavy Machinery Procurement",
+          requirements: "",
+        });
+        setTimeout(() => setSubmitted(false), 6000);
+      } else {
+        alert(result.message || "Something went wrong.");
+      }
+    } catch (err) {
+      console.error("Submission Error:", err);
+      alert("Server error. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -135,19 +166,19 @@ const Home = () => {
             <div className="flex flex-wrap justify-center gap-5 mb-16">
               <a
                 href="#quotation-section"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-xl active:scale-95"
               >
                 Request a Quote
               </a>
               <Link
                 to="/catalogue"
-                className="border border-slate-700 text-slate-300 hover:bg-white hover:text-slate-900 px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center"
+                className="border border-slate-700 text-slate-300 hover:bg-white hover:text-slate-900 px-10 py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all"
               >
                 View Equipment Catalogue
               </Link>
             </div>
 
-            {/* --- HERO SLIDER --- */}
+            {/* HERO SLIDER */}
             <div className="relative w-full max-w-6xl h-[400px] md:h-[600px] rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10">
               {sliderData.map((slide, index) => (
                 <div
@@ -250,7 +281,7 @@ const Home = () => {
           </form>
         </div>
 
-        {/* --- 3. TRUST BAR (RESTORED) --- */}
+        {/* --- 3. TRUST BAR --- */}
         <div className="bg-white py-16">
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12">
             {[
@@ -274,7 +305,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* --- 4. SERVICES TILES (RESTORED) --- */}
+        {/* --- 4. SERVICES TILES --- */}
         <section className="py-24 px-6 bg-slate-50">
           <div className="max-w-7xl mx-auto text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Our Core Expertise</h2>
@@ -320,6 +351,7 @@ const Home = () => {
             ))}
           </div>
         </section>
+
         {/* --- 5. FEATURED PROJECTS --- */}
         <section className="py-24 px-6 bg-white">
           <div className="max-w-7xl mx-auto">
@@ -349,7 +381,6 @@ const Home = () => {
                   title: "Machinery Fleet",
                   tags: "Construction",
                   result: "24-Hour Deployment",
-                  // Updated stable URL for a yellow construction excavator
                   img: "https://images.unsplash.com/photo-1579165466541-74e2b70a11d3?q=80&w=1470&auto=format&fit=crop",
                 },
               ].map((project, i) => (
@@ -357,17 +388,12 @@ const Home = () => {
                   key={i}
                   className="group relative h-80 rounded-3xl overflow-hidden border border-slate-200 p-8 flex flex-col justify-end hover:shadow-2xl transition-all cursor-pointer"
                 >
-                  {/* Background Image */}
                   <img
                     src={project.img}
                     alt={project.title}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-
-                  {/* Dark Gradient Overlay for Readability */}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-
-                  {/* Content */}
                   <div className="relative z-10">
                     <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2 block">
                       {project.tags}
@@ -383,7 +409,7 @@ const Home = () => {
           </div>
         </section>
 
-        {/* --- NEW SECTION: STAFF / LEADERSHIP --- */}
+        {/* --- 6. STAFF / LEADERSHIP --- */}
         <section className="py-24 px-6 bg-slate-50">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
@@ -424,7 +450,7 @@ const Home = () => {
           </div>
         </section>
 
-        {/* --- 6. PROFESSIONAL CONTACT SECTION --- */}
+        {/* --- 7. QUOTATION SECTION (FUNCTIONAL) --- */}
         <section
           id="quotation-section"
           className="relative py-32 px-6 overflow-hidden"
@@ -478,96 +504,77 @@ const Home = () => {
                   Please fill out technical fields.
                 </p>
               </div>
-              <form onSubmit={handleInquiry} className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <input
-                    required
-                    type="text"
-                    placeholder="Full Name"
-                    className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none focus:ring-2 focus:ring-blue-600 text-sm"
-                    value={formData.fullName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, fullName: e.target.value })
-                    }
-                  />
-                  <input
-                    required
-                    type="email"
-                    placeholder="Email Address"
-                    className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none focus:ring-2 focus:ring-blue-600 text-sm"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                  />
+
+              {submitted ? (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                    ✓
+                  </div>
+                  <h4 className="text-2xl font-bold text-slate-900">
+                    Message Received
+                  </h4>
+                  <p className="text-slate-500 mt-2">
+                    Our engineers are reviewing your requirements.
+                  </p>
                 </div>
-                <select
-                  className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none text-sm text-slate-500"
-                  value={formData.service}
-                  onChange={(e) =>
-                    setFormData({ ...formData, service: e.target.value })
-                  }
-                >
-                  <option>Heavy Machinery Procurement</option>
-                  <option>Oil & Gas Consultancy</option>
-                </select>
-                <textarea
-                  required
-                  placeholder="Technical Requirements..."
-                  rows="3"
-                  className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none resize-none text-sm"
-                  value={formData.requirements}
-                  onChange={(e) =>
-                    setFormData({ ...formData, requirements: e.target.value })
-                  }
-                ></textarea>
-                <button
-                  type="submit"
-                  className="w-full bg-slate-900 hover:bg-blue-600 text-white py-5 rounded-xl font-bold uppercase tracking-widest text-[11px] transition-all shadow-xl flex items-center justify-center gap-3"
-                >
-                  Submit Official Inquiry <span>→</span>
-                </button>
-              </form>
+              ) : (
+                <form onSubmit={handleInquiry} className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <input
+                      required
+                      type="text"
+                      placeholder="Full Name"
+                      className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+                      value={formData.fullName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, fullName: e.target.value })
+                      }
+                    />
+                    <input
+                      required
+                      type="email"
+                      placeholder="Email Address"
+                      className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                    />
+                  </div>
+                  <select
+                    className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none text-sm text-slate-500"
+                    value={formData.service}
+                    onChange={(e) =>
+                      setFormData({ ...formData, service: e.target.value })
+                    }
+                  >
+                    <option>Heavy Machinery Procurement</option>
+                    <option>Oil & Gas Consultancy</option>
+                    <option>Industrial Real Estate</option>
+                  </select>
+                  <textarea
+                    required
+                    placeholder="Technical Requirements..."
+                    rows="3"
+                    className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none resize-none text-sm"
+                    value={formData.requirements}
+                    onChange={(e) =>
+                      setFormData({ ...formData, requirements: e.target.value })
+                    }
+                  ></textarea>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-slate-900 hover:bg-blue-600 text-white py-5 rounded-xl font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                  >
+                    {loading ? "Processing..." : "Submit Official Inquiry"}{" "}
+                    <span>→</span>
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </section>
-
-        {/* --- 7. PARTNERS & BRANDS (RESTORED) ---
-        {/* --- 7. PARTNERS & BRANDS --- */}
-        {/* <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-6">
-            <p className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-12">
-              Authorized Procurement & Support for Global Industry Leaders
-            </p>
-            <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Caterpillar-logo.svg/2560px-Caterpillar-logo.svg.png"
-                alt="Caterpillar"
-                className="h-8 md:h-10 w-auto object-contain"
-              />
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Komatsu_logo.svg/2560px-Komatsu_logo.svg.png"
-                alt="Komatsu"
-                className="h-6 md:h-8 w-auto object-contain"
-              />
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Hyundai_Motor_Company_logo.svg/2560px-Hyundai_Motor_Company_logo.svg.png"
-                alt="Hyundai"
-                className="h-6 md:h-8 w-auto object-contain"
-              />
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Logo_TotalEnergies.svg/2560px-Logo_TotalEnergies.svg.png"
-                alt="TotalEnergies"
-                className="h-10 md:h-12 w-auto object-contain"
-              />
-              <img
-                src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e8/Shell_logo.svg/1200px-Shell_logo.svg.png"
-                alt="Shell"
-                className="h-10 md:h-12 w-auto object-contain"
-              />
-            </div>
-          </div>
-        </section> */}
       </main>
     </Layout>
   );

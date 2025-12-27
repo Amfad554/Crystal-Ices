@@ -1,7 +1,55 @@
+import { useState } from "react";
 import Layout from "../Shared/Layout/Layout";
 
+// --- CENTRALIZED API CONFIG ---
+const BASE_URL = "https://crystalbackend.onrender.com";
+
 const Contact = () => {
-  // Encoded address for the Google Maps URL
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    service: "Equipment Procurement",
+    requirements: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Updated to use the live Render BASE_URL
+      const response = await fetch(`${BASE_URL}/api/inquiry/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert("Inquiry submitted successfully!");
+        setFormData({
+          fullName: "",
+          email: "",
+          service: "Equipment Procurement",
+          requirements: "",
+        });
+      } else {
+        alert(data.message || "Something went wrong.");
+      }
+    } catch (error) {
+      alert("Server error. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fixed the Google Maps URL logic
   const mapAddress = "35 Ikosi Road, Ketu, Lagos, Nigeria";
   const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(
     mapAddress
@@ -99,7 +147,7 @@ const Contact = () => {
               <h3 className="text-2xl font-bold text-[#0B2A4A] mb-6">
                 Send Us a Message
               </h3>
-              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-5" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -107,6 +155,10 @@ const Contact = () => {
                     </label>
                     <input
                       type="text"
+                      name="fullName"
+                      required
+                      value={formData.fullName}
+                      onChange={handleChange}
                       placeholder="John Doe"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#00A3A3] outline-none transition-all"
                     />
@@ -117,6 +169,10 @@ const Contact = () => {
                     </label>
                     <input
                       type="email"
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
                       placeholder="john@example.com"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#00A3A3] outline-none transition-all"
                     />
@@ -127,7 +183,12 @@ const Contact = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Service Required
                   </label>
-                  <select className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#00A3A3] outline-none transition-all appearance-none bg-white">
+                  <select
+                    name="service"
+                    value={formData.service}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#00A3A3] outline-none transition-all appearance-none bg-white"
+                  >
                     <option>Equipment Procurement</option>
                     <option>Consultancy</option>
                     <option>Machinery Rental</option>
@@ -140,14 +201,22 @@ const Contact = () => {
                     Your Message
                   </label>
                   <textarea
+                    name="requirements"
+                    required
+                    value={formData.requirements}
+                    onChange={handleChange}
                     rows="4"
                     placeholder="How can we help you?"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#00A3A3] outline-none transition-all"
                   ></textarea>
                 </div>
 
-                <button className="w-full bg-[#0B2A4A] text-white font-bold py-4 rounded-lg hover:bg-[#00A3A3] transition-all shadow-lg active:scale-[0.98]">
-                  Submit Request
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#0B2A4A] text-white font-bold py-4 rounded-lg hover:bg-[#00A3A3] transition-all shadow-lg active:scale-[0.98] disabled:opacity-50"
+                >
+                  {loading ? "Sending..." : "Submit Request"}
                 </button>
               </form>
             </div>

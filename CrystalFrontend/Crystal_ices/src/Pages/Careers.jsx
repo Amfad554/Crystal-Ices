@@ -1,6 +1,12 @@
+import React, { useState } from "react";
 import Layout from "../Shared/Layout/Layout";
 
 const Careers = () => {
+  const [selectedRole, setSelectedRole] = useState(null); // Tracks which role is being applied for
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", cvLink: "" });
+  const [status, setStatus] = useState({ type: "", msg: "" });
+
   const openRoles = [
     {
       title: "Project Engineer (Oil & Gas)",
@@ -40,6 +46,42 @@ const Careers = () => {
     },
   ];
 
+  const handleApply = (role) => {
+    setSelectedRole(role);
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus({ type: "loading", msg: "Submitting application..." });
+
+    try {
+      // Inside Careers.jsx handleSubmit function
+      const response = await fetch(
+        "http://localhost:5000/api/users/careers/apply",
+        {
+          // Added /users
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            roleTitle: selectedRole.title,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (data.success) {
+        setStatus({ type: "success", msg: "Application sent successfully!" });
+        setFormData({ name: "", email: "", cvLink: "" });
+        setTimeout(() => setIsModalOpen(false), 2000);
+      } else {
+        setStatus({ type: "error", msg: "Submission failed. Try again." });
+      }
+    } catch (err) {
+      setStatus({ type: "error", msg: "Server error. Please try later." });
+    }
+  };
+
   return (
     <Layout>
       <div className="bg-white min-h-screen">
@@ -50,8 +92,7 @@ const Careers = () => {
               Build Your Future With Us
             </h1>
             <p className="text-gray-300 text-lg">
-              Join a team of innovators and experts shaping the energy and
-              infrastructure landscape of Nigeria.
+              Join a team of innovators shaping Nigeria's energy landscape.
             </p>
           </div>
         </section>
@@ -59,17 +100,12 @@ const Careers = () => {
         {/* Culture Section */}
         <section className="py-20 px-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div className="bg-gray-100 aspect-video rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-200 text-gray-400">
-            [Photo of Crystal Ices Team in the Field]
+            [Photo of Team]
           </div>
           <div>
             <h2 className="text-3xl font-bold text-[#0B2A4A] mb-6">
               Why Join Crystal Ices?
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-6">
-              At Crystal Ices Energies Nigeria Limited, we believe our greatest
-              asset is our people. We foster a culture of technical excellence,
-              integrity, and collaborative problem-solving.
-            </p>
             <div className="space-y-6">
               {benefits.map((benefit, idx) => (
                 <div key={idx} className="flex gap-4">
@@ -86,60 +122,101 @@ const Careers = () => {
           </div>
         </section>
 
-        {/* Job Openings Section */}
+        {/* Job Openings */}
         <section className="py-20 bg-gray-50 px-6">
           <div className="max-w-5xl mx-auto">
-            <div className="flex justify-between items-end mb-12">
-              <div>
-                <h2 className="text-3xl font-bold text-[#0B2A4A]">
-                  Current Openings
-                </h2>
-                <p className="text-gray-500">Find your next challenge</p>
-              </div>
-              <span className="text-[#00A3A3] font-bold text-sm bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm">
-                {openRoles.length} Positions Available
-              </span>
-            </div>
-
+            <h2 className="text-3xl font-bold text-[#0B2A4A] mb-8">
+              Current Openings
+            </h2>
             <div className="space-y-4">
               {openRoles.map((role, idx) => (
                 <div
                   key={idx}
-                  className="group bg-white p-6 rounded-xl border border-gray-200 hover:border-[#00A3A3] hover:shadow-md transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+                  className="bg-white p-6 rounded-xl border border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4"
                 >
                   <div>
-                    <h3 className="text-xl font-bold text-[#0B2A4A] group-hover:text-[#00A3A3] transition-colors">
+                    <h3 className="text-xl font-bold text-[#0B2A4A]">
                       {role.title}
                     </h3>
-                    <div className="flex gap-4 mt-1 text-sm text-gray-400">
-                      <span>📍 {role.location}</span>
-                      <span>📁 {role.department}</span>
-                    </div>
+                    <p className="text-sm text-gray-400">
+                      📍 {role.location} • {role.department}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-6 w-full md:w-auto">
-                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                      {role.type}
-                    </span>
-                    <button className="flex-1 md:flex-none bg-[#0B2A4A] text-white px-6 py-2 rounded font-bold text-sm hover:bg-[#00A3A3] transition-colors">
-                      Apply Now
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleApply(role)}
+                    className="bg-[#0B2A4A] text-white px-6 py-2 rounded font-bold hover:bg-[#00A3A3] transition-all"
+                  >
+                    Apply Now
+                  </button>
                 </div>
               ))}
             </div>
-
-            <div className="mt-12 text-center">
-              <p className="text-gray-500 text-sm">
-                Don't see a matching role? Send your CV to
-                <span className="text-[#0B2A4A] font-bold">
-                  {" "}
-                  careers@crystalicesenergies.ng
-                </span>{" "}
-                for future consideration.
-              </p>
-            </div>
           </div>
         </section>
+
+        {/* APPLICATION MODAL */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl relative">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-black"
+              >
+                ✕
+              </button>
+              <h2 className="text-2xl font-bold text-[#0B2A4A] mb-2">
+                Apply for Position
+              </h2>
+              <p className="text-[#00A3A3] font-bold mb-6">
+                {selectedRole?.title}
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  required
+                  className="w-full p-3 border rounded-lg outline-none focus:border-[#00A3A3]"
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                />
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  required
+                  className="w-full p-3 border rounded-lg outline-none focus:border-[#00A3A3]"
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                />
+                <input
+                  type="url"
+                  placeholder="Link to CV (Google Drive/Dropbox)"
+                  required
+                  className="w-full p-3 border rounded-lg outline-none focus:border-[#00A3A3]"
+                  onChange={(e) =>
+                    setFormData({ ...formData, cvLink: e.target.value })
+                  }
+                />
+                <button className="w-full bg-[#0B2A4A] text-white py-3 rounded-lg font-bold hover:bg-[#00A3A3]">
+                  Submit Application
+                </button>
+                {status.msg && (
+                  <p
+                    className={`text-center text-sm font-bold ${
+                      status.type === "error"
+                        ? "text-red-500"
+                        : "text-green-600"
+                    }`}
+                  >
+                    {status.msg}
+                  </p>
+                )}
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
