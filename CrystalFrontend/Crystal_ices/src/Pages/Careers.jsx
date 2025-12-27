@@ -55,12 +55,13 @@ const Careers = () => {
     e.preventDefault();
     setStatus({ type: "loading", msg: "Submitting application..." });
 
+    // 1. Use your Render URL for production
+    const BASE_URL = "https://crystalbackend.onrender.com";
+
     try {
-      // Inside Careers.jsx handleSubmit function
       const response = await fetch(
-        "http://localhost:5000/api/users/careers/apply",
+        `${BASE_URL}/api/users/careers/apply`, // Updated from localhost
         {
-          // Added /users
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -69,16 +70,29 @@ const Careers = () => {
           }),
         }
       );
+
       const data = await response.json();
+
       if (data.success) {
         setStatus({ type: "success", msg: "Application sent successfully!" });
         setFormData({ name: "", email: "", cvLink: "" });
-        setTimeout(() => setIsModalOpen(false), 2000);
+        // Close modal after success
+        setTimeout(() => {
+          setIsModalOpen(false);
+          setStatus({ type: "", msg: "" }); // Reset status
+        }, 2000);
       } else {
-        setStatus({ type: "error", msg: "Submission failed. Try again." });
+        setStatus({
+          type: "error",
+          msg: data.message || "Submission failed. Try again.",
+        });
       }
     } catch (err) {
-      setStatus({ type: "error", msg: "Server error. Please try later." });
+      console.error("Application Error:", err);
+      setStatus({
+        type: "error",
+        msg: "Network error. Please check your connection.",
+      });
     }
   };
 
