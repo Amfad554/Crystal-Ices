@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { CiMenuFries, CiLogin, CiCircleRemove } from "react-icons/ci"; 
+import { CiMenuFries, CiLogin, CiCircleRemove } from "react-icons/ci";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,10 +26,9 @@ const Navbar = () => {
     <nav className="bg-[#0B2A4A] p-4 shadow-md sticky top-0 z-50">
       {/* Container: Relative positioning is key for the absolute logo centering */}
       <div className="relative flex justify-between items-center w-full max-w-7xl mx-auto">
-        
         {/* 1. Mobile Menu Toggle (Left) */}
         <div className="flex items-center lg:hidden z-20">
-          <button 
+          <button
             className="text-white text-3xl"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
@@ -42,10 +41,10 @@ const Navbar = () => {
         {/* Mobile: Absolute center | Desktop: Static left */}
         <div className="absolute left-1/2 -translate-x-1/2 transform lg:static lg:left-0 lg:translate-x-0 z-10">
           <NavLink to="/">
-            <img 
-              src="/images/real_logo.png" 
-              alt="Logo" 
-              className="h-10 md:h-14 lg:h-16 w-auto object-contain" 
+            <img
+              src="/images/real_logo.png"
+              alt="Logo"
+              className="h-16 sm:h-20 md:h-14 lg:h-12 w-auto object-contain transition-all"
             />
           </NavLink>
         </div>
@@ -61,7 +60,10 @@ const Navbar = () => {
 
         {/* 4. Login Icon (Right) */}
         <div className="flex justify-end items-center z-20">
-          <NavLink to="/auth" className="text-white flex items-center space-x-1 hover:text-blue-400 transition">
+          <NavLink
+            to="/auth"
+            className="text-white flex items-center space-x-1 hover:text-blue-400 transition"
+          >
             <CiLogin className="text-2xl md:text-3xl" />
             <span className="hidden sm:inline text-sm font-medium">Login</span>
           </NavLink>
@@ -73,11 +75,13 @@ const Navbar = () => {
       {isOpen && (
         <div className="lg:hidden absolute top-full left-0 w-full bg-[#0B2A4A] border-t border-blue-900 z-50 flex flex-col p-4 space-y-2 shadow-xl">
           {navlinks.map((item) => (
-            <NavLink 
-              key={item.id} 
-              to={item.path} 
-              className={({ isActive }) => 
-                isActive ? "text-blue-400 font-bold p-3 bg-blue-950/50 rounded-lg" : "text-gray-200 p-3"
+            <NavLink
+              key={item.id}
+              to={item.path}
+              className={({ isActive }) =>
+                isActive
+                  ? "text-blue-400 font-bold p-3 bg-blue-950/50 rounded-lg"
+                  : "text-gray-200 p-3"
               }
               onClick={() => setIsOpen(false)}
             >
