@@ -5,7 +5,8 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2500);
+    // Increased to 4 seconds for a longer, more impactful branded intro
+    const timer = setTimeout(() => setLoading(false), 4000); 
     return () => clearTimeout(timer);
   }, []);
 
@@ -17,6 +18,8 @@ function App() {
           alt="Crystal Ices Logo"
           style={logoStyle}
         />
+        {/* Moderate, stylish branding text */}
+        <h2 style={textStyle}>CRYSTAL ICES</h2>
       </div>
     );
   }
@@ -40,13 +43,22 @@ const spinnerContainerStyle = {
 };
 
 const logoStyle = {
-  width: "160px", 
+  width: "140px", // Slightly smaller logo to balance with the text
   height: "auto",
-  marginBottom: "20px",
-  // A slight white glow helps the logo stand out on black
-  filter: "drop-shadow(0px 0px 20px rgba(255, 255, 255, 0.2))", 
+  marginBottom: "15px",
+  filter: "drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.3))", 
   animation: "bounce 1.5s infinite ease-in-out",
 };
 
+const textStyle = {
+  color: "#ffffff",
+  fontSize: "1.2rem",          // "Moderate" size (not too big)
+  fontWeight: "600",           // Bold but clean
+  letterSpacing: "6px",        // Stylish industrial spacing
+  textTransform: "uppercase",  // Professional corporate look
+  fontFamily: "sans-serif",
+  opacity: "0.9",              // Slightly dimmed for a sophisticated look
+  margin: "0"
+};
 
 export default App;
