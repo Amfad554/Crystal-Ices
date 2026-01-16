@@ -69,6 +69,9 @@ const Auth = () => {
         if (view === "login") {
           localStorage.setItem("token", result.token);
           localStorage.setItem("user", JSON.stringify(result.user));
+
+          window.dispatchEvent(new Event("auth-state-change")); 
+
           navigate("/dashboard");
         } else {
           showAlert(

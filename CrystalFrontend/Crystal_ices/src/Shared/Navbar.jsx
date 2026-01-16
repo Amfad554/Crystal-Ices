@@ -1,32 +1,46 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { CiMenuFries, CiLogin, CiCircleRemove, CiGrid41, CiLogout } from "react-icons/ci";
+import {
+  CiMenuFries,
+  CiLogin,
+  CiCircleRemove,
+  CiGrid41,
+  CiLogout,
+} from "react-icons/ci";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation(); // Used to trigger re-check on navigation
+  const location = useLocation();
 
-  // 1. Better Auth Check: Runs on mount AND whenever the URL changes
+  // 1. Wrapped in useCallback to prevent "checkUserAuth" changing on every render
+  const checkUserAuth = useCallback(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token);
+    // Initial check
+    checkUserAuth();
+
+    // LISTEN FOR THE SIGNALS
+    window.addEventListener("auth-state-change", checkUserAuth);
+    window.addEventListener("storage", checkUserAuth);
+
+    return () => {
+      window.removeEventListener("auth-state-change", checkUserAuth);
+      window.removeEventListener("storage", checkUserAuth);
     };
+  }, [checkUserAuth, location]); // location added here to re-check on every route change
 
-    checkAuth();
-    // Listen for storage changes in other tabs
-    window.addEventListener("storage", checkAuth);
-    return () => window.removeEventListener("storage", checkAuth);
-  }, [location]); // Re-checking whenever the user moves to a new page
-
-  // 2. Logout Function
+  // 2. Logout handler
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
     setIsOpen(false);
-    navigate("/"); // Redirect to home after logout
+    window.dispatchEvent(new Event("auth-state-change"));
+    navigate("/");
   };
 
   const navlinks = [
@@ -34,7 +48,7 @@ const Navbar = () => {
     { id: 2, name: "About Us", path: "/about" },
     { id: 3, name: "Services", path: "/services" },
     { id: 4, name: "Project", path: "/project" },
-    { id: 5, name: "Equipment Catalogue", path: "/catalogue" },
+    { id: 5, name: "Catalogue", path: "/catalogue" },
     { id: 6, name: "News", path: "/news" },
     { id: 7, name: "Careers", path: "/careers" },
     { id: 8, name: "Contact Us", path: "/contact" },
@@ -42,7 +56,7 @@ const Navbar = () => {
 
   const linkStyles = ({ isActive }) =>
     isActive
-      ? "text-[#00A3A3] font-semibold p-2 border-b-2 border-[#00A3A3]"
+      ? "text-[#00A3A3] font-semibold p-2 border-b-2 border-[#00A3A3] text-sm"
       : "text-gray-200 p-2 hover:text-white transition duration-75 text-sm font-medium";
 
   return (
@@ -54,6 +68,7 @@ const Navbar = () => {
           <button
             className="text-white text-3xl"
             onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
           >
             {isOpen ? <CiCircleRemove /> : <CiMenuFries />}
           </button>
@@ -70,7 +85,7 @@ const Navbar = () => {
           </NavLink>
         </div>
 
-        {/* Desktop Links */}
+        {/* Desktop Navigation */}
         <div className="hidden lg:flex flex-grow justify-center items-center space-x-1 xl:space-x-4">
           {navlinks.map((item) => (
             <NavLink key={item.id} to={item.path} className={linkStyles}>
@@ -79,19 +94,21 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* Auth/Dashboard Toggle Icon */}
+        {/* DYNAMIC AUTH ICON */}
         <div className="flex justify-end items-center z-20 gap-4">
           {isLoggedIn ? (
             <div className="flex items-center gap-3">
               <NavLink
                 to="/admin/dashboard"
-                className="text-white flex items-center space-x-1 bg-[#00A3A3]/20 px-3 py-1.5 rounded-lg border border-[#00A3A3] hover:bg-[#00A3A3] transition-all"
+                className="text-white flex items-center space-x-2 bg-[#00A3A3]/20 px-3 py-1.5 rounded-lg border border-[#00A3A3] hover:bg-[#00A3A3] transition-all"
               >
                 <CiGrid41 className="text-2xl" />
-                <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">Dashboard</span>
+                <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest">
+                  Dashboard
+                </span>
               </NavLink>
-              
-              <button 
+
+              <button
                 onClick={handleLogout}
                 className="text-gray-400 hover:text-red-400 transition-colors"
                 title="Logout"
@@ -102,10 +119,12 @@ const Navbar = () => {
           ) : (
             <NavLink
               to="/auth"
-              className="text-white flex items-center space-x-1 hover:text-[#00A3A3] transition-all"
+              className="text-white flex items-center space-x-2 hover:text-[#00A3A3] transition-all"
             >
               <CiLogin className="text-2xl md:text-3xl" />
-              <span className="hidden sm:inline text-sm font-medium">Login</span>
+              <span className="hidden sm:inline text-sm font-medium">
+                Login
+              </span>
             </NavLink>
           )}
         </div>
@@ -128,13 +147,12 @@ const Navbar = () => {
               {item.name}
             </NavLink>
           ))}
-          {/* Mobile Logout if logged in */}
           {isLoggedIn && (
             <button
               onClick={handleLogout}
-              className="text-red-400 p-3 text-left font-bold"
+              className="text-red-400 p-3 text-left font-bold flex items-center gap-2"
             >
-              Logout
+              <CiLogout /> Logout
             </button>
           )}
         </div>
