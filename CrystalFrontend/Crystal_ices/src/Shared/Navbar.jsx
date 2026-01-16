@@ -1,9 +1,33 @@
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { CiMenuFries, CiLogin, CiCircleRemove } from "react-icons/ci";
+import { useState, useEffect } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { CiMenuFries, CiLogin, CiCircleRemove, CiGrid41, CiLogout } from "react-icons/ci";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation(); // Used to trigger re-check on navigation
+
+  // 1. Better Auth Check: Runs on mount AND whenever the URL changes
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      setIsLoggedIn(!!token);
+    };
+
+    checkAuth();
+    // Listen for storage changes in other tabs
+    window.addEventListener("storage", checkAuth);
+    return () => window.removeEventListener("storage", checkAuth);
+  }, [location]); // Re-checking whenever the user moves to a new page
+
+  // 2. Logout Function
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    setIsOpen(false);
+    navigate("/"); // Redirect to home after logout
+  };
 
   const navlinks = [
     { id: 1, name: "Home", path: "/" },
@@ -14,42 +38,39 @@ const Navbar = () => {
     { id: 6, name: "News", path: "/news" },
     { id: 7, name: "Careers", path: "/careers" },
     { id: 8, name: "Contact Us", path: "/contact" },
-    { id: 9, name: "Privacy Policy", path: "/privacy" },
   ];
 
   const linkStyles = ({ isActive }) =>
     isActive
-      ? "text-blue-400 font-semibold p-2 border-b-2 border-blue-400"
-      : "text-gray-200 p-2 hover:text-white transition duration-75 text-sm";
+      ? "text-[#00A3A3] font-semibold p-2 border-b-2 border-[#00A3A3]"
+      : "text-gray-200 p-2 hover:text-white transition duration-75 text-sm font-medium";
 
   return (
     <nav className="bg-[#0B2A4A] p-4 shadow-md sticky top-0 z-50">
-      {/* Container: Relative positioning is key for the absolute logo centering */}
       <div className="relative flex justify-between items-center w-full max-w-7xl mx-auto">
-        {/* 1. Mobile Menu Toggle (Left) */}
+        
+        {/* Mobile Menu Toggle */}
         <div className="flex items-center lg:hidden z-20">
           <button
             className="text-white text-3xl"
             onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle menu"
           >
             {isOpen ? <CiCircleRemove /> : <CiMenuFries />}
           </button>
         </div>
 
-        {/* 2. Logo */}
-        {/* Mobile: Absolute center | Desktop: Static left */}
+        {/* Logo */}
         <div className="absolute left-1/2 -translate-x-1/2 transform lg:static lg:left-0 lg:translate-x-0 z-10">
           <NavLink to="/">
             <img
               src="/images/real_logo.png"
               alt="Logo"
-              className="h-16 sm:h-20 md:h-14 lg:h-12 w-auto object-contain transition-all"
+              className="h-10 sm:h-12 w-auto object-contain transition-all"
             />
           </NavLink>
         </div>
 
-        {/* 3. Desktop Links (Hidden on Mobile) */}
+        {/* Desktop Links */}
         <div className="hidden lg:flex flex-grow justify-center items-center space-x-1 xl:space-x-4">
           {navlinks.map((item) => (
             <NavLink key={item.id} to={item.path} className={linkStyles}>
@@ -58,20 +79,39 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* 4. Login Icon (Right) */}
-        <div className="flex justify-end items-center z-20">
-          <NavLink
-            to="/auth"
-            className="text-white flex items-center space-x-1 hover:text-blue-400 transition"
-          >
-            <CiLogin className="text-2xl md:text-3xl" />
-            <span className="hidden sm:inline text-sm font-medium">Login</span>
-          </NavLink>
+        {/* Auth/Dashboard Toggle Icon */}
+        <div className="flex justify-end items-center z-20 gap-4">
+          {isLoggedIn ? (
+            <div className="flex items-center gap-3">
+              <NavLink
+                to="/admin/dashboard"
+                className="text-white flex items-center space-x-1 bg-[#00A3A3]/20 px-3 py-1.5 rounded-lg border border-[#00A3A3] hover:bg-[#00A3A3] transition-all"
+              >
+                <CiGrid41 className="text-2xl" />
+                <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">Dashboard</span>
+              </NavLink>
+              
+              <button 
+                onClick={handleLogout}
+                className="text-gray-400 hover:text-red-400 transition-colors"
+                title="Logout"
+              >
+                <CiLogout className="text-2xl" />
+              </button>
+            </div>
+          ) : (
+            <NavLink
+              to="/auth"
+              className="text-white flex items-center space-x-1 hover:text-[#00A3A3] transition-all"
+            >
+              <CiLogin className="text-2xl md:text-3xl" />
+              <span className="hidden sm:inline text-sm font-medium">Login</span>
+            </NavLink>
+          )}
         </div>
       </div>
 
-      {/* 5. Mobile Menu Overlay */}
-      {/* Added a simple transition height/opacity logic could be added here */}
+      {/* Mobile Menu Overlay */}
       {isOpen && (
         <div className="lg:hidden absolute top-full left-0 w-full bg-[#0B2A4A] border-t border-blue-900 z-50 flex flex-col p-4 space-y-2 shadow-xl">
           {navlinks.map((item) => (
@@ -80,7 +120,7 @@ const Navbar = () => {
               to={item.path}
               className={({ isActive }) =>
                 isActive
-                  ? "text-blue-400 font-bold p-3 bg-blue-950/50 rounded-lg"
+                  ? "text-[#00A3A3] font-bold p-3 bg-blue-950/50 rounded-lg"
                   : "text-gray-200 p-3"
               }
               onClick={() => setIsOpen(false)}
@@ -88,6 +128,15 @@ const Navbar = () => {
               {item.name}
             </NavLink>
           ))}
+          {/* Mobile Logout if logged in */}
+          {isLoggedIn && (
+            <button
+              onClick={handleLogout}
+              className="text-red-400 p-3 text-left font-bold"
+            >
+              Logout
+            </button>
+          )}
         </div>
       )}
     </nav>
