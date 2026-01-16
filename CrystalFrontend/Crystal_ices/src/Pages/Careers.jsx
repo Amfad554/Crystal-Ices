@@ -13,7 +13,7 @@ const Careers = () => {
       location: "Lagos / Port Harcourt",
       type: "Full-Time",
       department: "Technical",
-    },
+    }, 
     {
       title: "Procurement Specialist",
       location: "Ketu, Lagos",
@@ -24,7 +24,7 @@ const Careers = () => {
       title: "Heavy Equipment Operator",
       location: "Field Operations",
       type: "Contract",
-      department: "Operations",
+      department: "Operations", 
     },
   ];
 
