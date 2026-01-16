@@ -98,7 +98,6 @@ const Navbar = () => {
               to="/dashboard"
               className="text-white flex items-center space-x-2 bg-[#00A3A3] px-4 py-2 rounded-lg hover:bg-[#008b8b] transition-all shadow-lg active:scale-95"
             >
-              <CiGrid41 className="text-xl md:text-2xl" />
               <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest">
                 Dashboard
               </span>
