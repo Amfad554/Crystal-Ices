@@ -14,17 +14,13 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 1. Wrapped in useCallback to prevent "checkUserAuth" changing on every render
   const checkUserAuth = useCallback(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
   }, []);
 
   useEffect(() => {
-    // Initial check
     checkUserAuth();
-
-    // LISTEN FOR THE SIGNALS
     window.addEventListener("auth-state-change", checkUserAuth);
     window.addEventListener("storage", checkUserAuth);
 
@@ -32,11 +28,11 @@ const Navbar = () => {
       window.removeEventListener("auth-state-change", checkUserAuth);
       window.removeEventListener("storage", checkUserAuth);
     };
-  }, [checkUserAuth, location]); // location added here to re-check on every route change
+  }, [checkUserAuth, location]);
 
-  // 2. Logout handler
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user"); // Clean up user data too
     setIsLoggedIn(false);
     setIsOpen(false);
     window.dispatchEvent(new Event("auth-state-change"));
@@ -60,9 +56,9 @@ const Navbar = () => {
       : "text-gray-200 p-2 hover:text-white transition duration-75 text-sm font-medium";
 
   return (
-    <nav className="bg-[#0B2A4A] p-4 shadow-md sticky top-0 z-50">
+    /* Increased z-index to z-[100] to ensure it stays on top */
+    <nav className="bg-[#0B2A4A] p-4 shadow-md sticky top-0 z-[100]">
       <div className="relative flex justify-between items-center w-full max-w-7xl mx-auto">
-        
         {/* Mobile Menu Toggle */}
         <div className="flex items-center lg:hidden z-20">
           <button
@@ -94,28 +90,19 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* DYNAMIC AUTH ICON */}
-        <div className="flex justify-end items-center z-20 gap-4">
+        {/* DYNAMIC AUTH SECTION */}
+        <div className="flex justify-end items-center z-20">
           {isLoggedIn ? (
-            <div className="flex items-center gap-3">
-              <NavLink
-                to="/admin/dashboard"
-                className="text-white flex items-center space-x-2 bg-[#00A3A3]/20 px-3 py-1.5 rounded-lg border border-[#00A3A3] hover:bg-[#00A3A3] transition-all"
-              >
-                <CiGrid41 className="text-2xl" />
-                <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest">
-                  Dashboard
-                </span>
-              </NavLink>
-
-              <button
-                onClick={handleLogout}
-                className="text-gray-400 hover:text-red-400 transition-colors"
-                title="Logout"
-              >
-                <CiLogout className="text-2xl" />
-              </button>
-            </div>
+            /* Updated to /dashboard and removed the extra logout button */
+            <NavLink
+              to="/dashboard"
+              className="text-white flex items-center space-x-2 bg-[#00A3A3] px-4 py-2 rounded-lg hover:bg-[#008b8b] transition-all shadow-lg active:scale-95"
+            >
+              <CiGrid41 className="text-xl md:text-2xl" />
+              <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest">
+                Dashboard
+              </span>
+            </NavLink>
           ) : (
             <NavLink
               to="/auth"
@@ -132,7 +119,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Overlay */}
       {isOpen && (
-        <div className="lg:hidden absolute top-full left-0 w-full bg-[#0B2A4A] border-t border-blue-900 z-50 flex flex-col p-4 space-y-2 shadow-xl">
+        <div className="lg:hidden absolute top-full left-0 w-full bg-[#0B2A4A] border-t border-blue-900 z-[101] flex flex-col p-4 space-y-2 shadow-xl">
           {navlinks.map((item) => (
             <NavLink
               key={item.id}
@@ -150,9 +137,9 @@ const Navbar = () => {
           {isLoggedIn && (
             <button
               onClick={handleLogout}
-              className="text-red-400 p-3 text-left font-bold flex items-center gap-2"
+              className="text-red-400 p-3 text-left font-bold flex items-center gap-2 border-t border-blue-900 mt-2"
             >
-              <CiLogout /> Logout
+              <CiLogout className="text-xl" /> Logout
             </button>
           )}
         </div>
