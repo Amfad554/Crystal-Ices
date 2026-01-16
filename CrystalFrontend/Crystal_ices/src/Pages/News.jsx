@@ -1,22 +1,18 @@
-import { useState } from "react"; 
+import { useState } from "react";
 import Layout from "../Shared/Layout/Layout";
 
-// --- CENTRALIZED API CONFIG ---
 const BASE_URL = "https://crystalbackend.onrender.com";
 
 const News = () => {
-  // 2. Setup state for email and loading status
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 3. Updated submit handler with Render URL
   const handleJoin = async (e) => {
     e.preventDefault();
     if (!email) return alert("Please enter an email address");
 
     setLoading(true);
     try {
-      // Updated to use the live Render BASE_URL
       const res = await fetch(`${BASE_URL}/api/users/newsletter-subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -31,6 +27,8 @@ const News = () => {
         alert(data.message || "Something went wrong.");
       }
     } catch (err) {
+      console.log(err);
+      
       alert("Failed to connect to the server.");
     } finally {
       setLoading(false);
@@ -75,83 +73,90 @@ const News = () => {
   return (
     <Layout>
       <div className="bg-white min-h-screen">
-        {/* News Hero */}
-        <section className="bg-[#0B2A4A] py-20 px-6 text-white">
+        {/* Header Section - Aligned with Project/Catalogue */}
+        <section className="bg-[#0B2A4A] py-24 px-6 text-white">
           <div className="max-w-7xl mx-auto">
-            <p className="text-[#00A3A3] font-bold text-xs uppercase tracking-[0.3em] mb-4">Insights & Updates</p>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter max-w-3xl">
+            <p className="text-[#00A3A3] font-bold text-sm uppercase tracking-widest mb-4">Insights & Updates</p>
+            <h1 className="text-4xl md:text-5xl font-bold max-w-3xl leading-tight">
               Stay Informed on Energy & Infrastructure.
             </h1>
           </div>
         </section>
 
-        <section className="py-16 px-6 max-w-7xl mx-auto">
-          {/* Featured Article */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20 items-center">
-            <div className="bg-gray-100 aspect-video rounded-2xl flex items-center justify-center text-7xl shadow-inner">
+        <section className="py-20 px-6 max-w-7xl mx-auto">
+          {/* Featured Article - Aligned with Who We Are section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-24 items-center">
+            <div className="bg-gray-50 aspect-video rounded-2xl flex items-center justify-center text-8xl border border-gray-100 shadow-sm">
               🌍
             </div>
             <div>
-              <span className="text-[#00A3A3] font-black text-xs uppercase bg-teal-50 px-3 py-1 rounded">Featured News</span>
-              <h2 className="text-3xl font-bold text-[#0B2A4A] mt-4 mb-4 leading-tight">
+              <span className="text-[#00A3A3] font-semibold text-sm uppercase tracking-wide">Featured News</span>
+              <h2 className="text-3xl font-bold text-[#0B2A4A] mt-4 mb-6 leading-tight">
                 Expanding Our Footprint: New Operations Hub in the Niger Delta
               </h2>
-              <p className="text-gray-600 mb-6 leading-relaxed">
+              <p className="text-gray-600 mb-8 text-lg leading-relaxed">
                 As part of our 2026 strategic expansion, Crystal Ices Energies is establishing a 
                 dedicated logistics and technical support base to better serve our offshore 
-                and midstream partners...
+                and midstream partners in the South-South region.
               </p>
-              <button className="text-[#0B2A4A] font-black text-sm border-b-2 border-[#0B2A4A] pb-1 hover:text-[#00A3A3] hover:border-[#00A3A3] transition-all">
-                READ FULL STORY
+              <button className="bg-[#0B2A4A] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#00A3A3] transition-all shadow-md">
+                Read Full Story
               </button>
             </div>
           </div>
 
-          <hr className="mb-20 border-gray-100" />
+          <hr className="mb-24 border-gray-100" />
 
-          {/* Latest News Grid */}
-          <h3 className="text-2xl font-bold text-[#0B2A4A] mb-10">Latest Updates</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+          {/* Latest News Grid - Aligned with Project Cards */}
+          <h3 className="text-3xl font-bold text-[#0B2A4A] mb-12">Latest Updates</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {articles.map((post) => (
-              <div key={post.id} className="group cursor-pointer">
-                <div className="bg-gray-50 aspect-video rounded-xl mb-6 flex items-center justify-center text-5xl group-hover:bg-gray-100 transition-colors">
+              <div key={post.id} className="group flex flex-col">
+                <div className="bg-gray-50 aspect-video rounded-2xl mb-6 flex items-center justify-center text-5xl border border-gray-100 group-hover:bg-white group-hover:shadow-lg transition-all duration-300">
                   {post.image}
                 </div>
-                <div className="flex items-center gap-4 mb-3">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{post.date}</span>
-                  <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                  <span className="text-[10px] font-bold text-[#00A3A3] uppercase tracking-widest">{post.category}</span>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-xs font-bold text-[#00A3A3] uppercase tracking-wider">{post.category}</span>
+                  <span className="text-gray-300">•</span>
+                  <span className="text-xs font-medium text-gray-500">{post.date}</span>
                 </div>
-                <h4 className="text-xl font-bold text-[#0B2A4A] group-hover:text-[#00A3A3] transition-colors mb-3 leading-snug">
+                <h4 className="text-xl font-bold text-[#0B2A4A] mb-4 leading-snug group-hover:text-[#00A3A3] transition-colors">
                   {post.title}
                 </h4>
-                <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed">
+                <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-3">
                   {post.excerpt}
                 </p>
+                <div className="mt-auto">
+                  <button className="text-[#0B2A4A] font-bold text-sm hover:translate-x-1 transition-transform inline-flex items-center gap-2">
+                    Read More <span>→</span>
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Newsletter / CTA */}
-        <section className="bg-[#0B2A4A] py-16 px-6 mt-20">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">Subscribe to our Industry Insights</h2>
-            <p className="text-gray-400 mb-8 text-sm">Get the latest project updates and energy sector news delivered to your inbox.</p>
+        {/* Newsletter - Aligned with Careers/Catalogue CTA style */}
+        <section className="bg-[#0B2A4A] py-24 px-6 mt-20">
+          <div className="max-w-4xl mx-auto text-center text-white">
+            <h2 className="text-3xl font-bold mb-4">Subscribe to our Industry Insights</h2>
+            <p className="text-gray-300 mb-10 text-lg max-w-2xl mx-auto">
+              Get the latest project updates and energy sector news delivered to your inbox.
+            </p>
             
-            <form onSubmit={handleJoin} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+            <form onSubmit={handleJoin} className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
               <input 
                 required
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email" 
-                className="flex-1 px-6 py-3 rounded-none focus:outline-none text-black" 
+                placeholder="Enter your email address" 
+                className="flex-1 px-6 py-4 rounded-xl focus:outline-none text-black border-2 border-transparent focus:border-[#00A3A3] transition-all" 
               />
               <button 
                 disabled={loading}
                 type="submit"
-                className="bg-[#00A3A3] text-white px-8 py-3 font-bold uppercase text-xs tracking-widest hover:bg-teal-600 transition-colors disabled:opacity-50"
+                className="bg-[#00A3A3] text-white px-10 py-4 rounded-xl font-bold hover:bg-teal-600 transition-all shadow-lg disabled:opacity-50"
               >
                 {loading ? "Joining..." : "Join"}
               </button>

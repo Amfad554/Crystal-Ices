@@ -10,11 +10,81 @@ const Project = () => {
       title: "Refinery Equipment Supply",
       category: "Oil & Gas",
       location: "Port Harcourt",
-      description: "Procurement and delivery of specialized high-pressure valves and piping components for refinery maintenance.",
+      description:
+        "Procurement and delivery of specialized high-pressure valves and piping components for refinery maintenance.",
       status: "Completed",
       icon: "⛽",
     },
-    // ... rest of your project data
+    {
+      id: 2,
+      title: "Industrial Site Preparation",
+      category: "Machinery Rental",
+      location: "Lekki Free Zone, Lagos",
+      description:
+        "Deployment of excavators and heavy-duty trucks for large-scale industrial foundation work.",
+      status: "In Progress",
+      icon: "🚜",
+    },
+    {
+      id: 3,
+      title: "Energy Estate Acquisition",
+      category: "Real Estate",
+      location: "Ibeju-Lekki",
+      description:
+        "Consultancy for the acquisition of 50 hectares of land for a proposed independent power plant.",
+      status: "Completed",
+      icon: "🏢",
+    },
+    {
+      id: 4,
+      title: "Offshore Logistics Support",
+      category: "Consultancy",
+      location: "Niger Delta",
+      description:
+        "Project management and regulatory compliance advisory for offshore equipment mobilization.",
+      status: "Completed",
+      icon: "🚢",
+    },
+    {
+      id: 5,
+      title: "Pipeline Integrity Inspection",
+      category: "Oil & Gas",
+      location: "Delta State",
+      description:
+        "Coordinating technical teams for the ultrasonic testing and repair of midstream pipeline assets.",
+      status: "Completed",
+      icon: "🛠️",
+    },
+    {
+      id: 6,
+      title: "Warehouse Construction Fleet",
+      category: "Machinery Rental",
+      location: "Ketu-Epe Expressway",
+      description:
+        "Rental of telescopic cranes and forklifts for the structural assembly of a multi-purpose warehouse.",
+      status: "Completed",
+      icon: "🏗️",
+    },
+    {
+      id: 7,
+      title: "LPG Plant Development",
+      category: "Consultancy",
+      location: "Ogun State Border",
+      description:
+        "End-to-end consultancy for NUPRC licensing and environmental impact assessments for a new LPG bottling plant.",
+      status: "In Progress",
+      icon: "🔥",
+    },
+    {
+      id: 8,
+      title: "Industrial Park Land Survey",
+      category: "Real Estate",
+      location: "Badagry Expressway",
+      description:
+        "Mapping and title perfection for a 20-unit industrial mini-estate targeting energy SMEs.",
+      status: "Completed",
+      icon: "📐",
+    },
   ];
 
   const filteredProjects =
@@ -22,23 +92,32 @@ const Project = () => {
       ? projects
       : projects.filter((p) => p.category === activeTab);
 
-  const categories = ["All", "Oil & Gas", "Machinery Rental", "Real Estate", "Consultancy"];
+  const categories = [
+    "All",
+    "Oil & Gas",
+    "Machinery Rental",
+    "Real Estate",
+    "Consultancy",
+  ];
 
   return (
     <Layout>
       <div className="bg-white min-h-screen">
-        {/* Hero Section - Aligned with About Header style */}
+        {/* Hero Section */}
         <section className="bg-[#0B2A4A] py-24 px-6 text-center text-white">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Our Track Record</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              Our Track Record
+            </h1>
             <p className="text-gray-300 text-lg leading-relaxed">
-              Built on Reliability & Precision. Delivering excellence across the Nigerian industrial landscape.
+              Built on Reliability & Precision. Delivering excellence across the
+              Nigerian industrial landscape.
             </p>
           </div>
         </section>
 
         <section className="py-20 px-6 max-w-7xl mx-auto">
-          {/* Functional Filters - Cleaned up typography */}
+          {/* Category Filters */}
           <div className="flex flex-wrap justify-center gap-3 mb-16">
             {categories.map((tab) => (
               <button
@@ -55,16 +134,16 @@ const Project = () => {
             ))}
           </div>
 
-          {/* Grid - Standardized text sizes to match About page */}
+          {/* Project Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="group bg-white border border-gray-100 p-8 rounded-2xl hover:shadow-xl transition-all duration-300"
+                className="group bg-white border border-gray-100 p-8 rounded-2xl hover:shadow-xl transition-all duration-300 flex flex-col"
               >
                 <div className="text-5xl mb-6">{project.icon}</div>
 
-                <h3 className="text-2xl font-bold text-[#0B2A4A] mb-3">
+                <h3 className="text-2xl font-bold text-[#0B2A4A] mb-3 leading-tight">
                   {project.title}
                 </h3>
 
@@ -72,7 +151,7 @@ const Project = () => {
                   {project.category}
                 </p>
 
-                <p className="text-gray-600 leading-relaxed mb-6">
+                <p className="text-gray-600 leading-relaxed mb-6 flex-grow">
                   {project.description}
                 </p>
 
@@ -80,7 +159,13 @@ const Project = () => {
                   <span className="text-sm font-medium text-gray-500">
                     📍 {project.location}
                   </span>
-                  <span className="text-xs font-bold px-3 py-1 bg-green-50 text-green-600 rounded-full">
+                  <span
+                    className={`text-xs font-bold px-3 py-1 rounded-full ${
+                      project.status === "Completed"
+                        ? "bg-green-50 text-green-600"
+                        : "bg-blue-50 text-blue-600"
+                    }`}
+                  >
                     {project.status}
                   </span>
                 </div>
@@ -89,7 +174,7 @@ const Project = () => {
           </div>
         </section>
 
-        {/* Call to Action - Font weights aligned with About section */}
+        {/* Call to Action */}
         <section className="bg-gray-50 py-20 px-6 text-center">
           <h2 className="text-3xl font-bold text-[#0B2A4A] mb-4">
             Want to see more of our work?
