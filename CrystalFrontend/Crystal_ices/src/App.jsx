@@ -15,10 +15,10 @@ function App() {
     return (
       <div style={spinnerContainerStyle}>
         {/* Engineering/Oil vibe: Use Steel Blue, Slate, or Safety Orange */}
-        <PulseLoader color="#2c3e50" width={150} height={5} />
-        <h2 style={{ marginTop: '20px', fontFamily: 'sans-serif', color: '#2c3e50' }}>
+        <PulseLoader color="blue" width={200} height={15} />
+        <h1 style={{ marginTop: '20px', fontFamily: 'sans-serif', color: 'blue' }}>
           Crystal Ices
-        </h2>
+        </h1>
       </div>
     );
   }
