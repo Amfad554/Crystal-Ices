@@ -59,6 +59,7 @@ const Navbar = () => {
     /* Increased z-index to z-[100] to ensure it stays on top */
     <nav className="bg-[#0B2A4A] p-4 shadow-md sticky top-0 z-[100]">
       <div className="relative flex justify-between items-center w-full max-w-7xl mx-auto">
+        
         {/* Mobile Menu Toggle */}
         <div className="flex items-center lg:hidden z-20">
           <button
