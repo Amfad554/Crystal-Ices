@@ -5,24 +5,18 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2500); // 2.5s for a nice branded intro
+    const timer = setTimeout(() => setLoading(false), 2500);
     return () => clearTimeout(timer);
   }, []);
 
   if (loading) {
     return (
       <div style={spinnerContainerStyle}>
-        {/* The Bouncing Logo */}
-        <img 
-          src="/images/real_logo.png" 
-          alt="Crystal Ices Logo" 
-          style={logoStyle} 
+        <img
+          src="/images/real_logo.png"
+          alt="Crystal Ices Logo"
+          style={logoStyle}
         />
-        
-        {/* The Stylish Text */}
-        <h1 style={textStyle}>
-          CRYSTAL ICES
-        </h1>
       </div>
     );
   }
@@ -34,32 +28,25 @@ function App() {
   );
 }
 
-// --- Styles and Animations ---
+// --- Styles ---
 
 const spinnerContainerStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  height: '100vh',
-  backgroundColor: '#ffffff',
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  height: "100vh",
+  backgroundColor: "#000000", // Sleek Black Background
 };
 
 const logoStyle = {
-  width: '180px',            // Size of your logo
-  height: 'auto',
-  marginBottom: '20px',
-  filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.1))', // Makes it pop
-  animation: 'bounce 1.5s infinite ease-in-out'        // Link to the keyframe below
+  width: "160px", 
+  height: "auto",
+  marginBottom: "20px",
+  // A slight white glow helps the logo stand out on black
+  filter: "drop-shadow(0px 0px 20px rgba(255, 255, 255, 0.2))", 
+  animation: "bounce 1.5s infinite ease-in-out",
 };
 
-const textStyle = {
-  fontSize: '3.5rem',
-  fontWeight: '900',          // Extra Bold
-  letterSpacing: '10px',      // Wide spacing for that engineering look
-  color: '#003366',           // Dark Blue
-  textTransform: 'uppercase',
-  fontFamily: '"Arial Black", sans-serif', 
-};
 
 export default App;
