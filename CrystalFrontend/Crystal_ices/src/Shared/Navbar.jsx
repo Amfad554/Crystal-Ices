@@ -48,6 +48,7 @@ const Navbar = () => {
     { id: 6, name: "News", path: "/news" },
     { id: 7, name: "Careers", path: "/careers" },
     { id: 8, name: "Contact Us", path: "/contact" },
+    { id: 9, name: "Privacy Policy", path: "/privacy" },
   ];
 
   const linkStyles = ({ isActive }) =>
