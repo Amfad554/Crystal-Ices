@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import { BarLoader } from "react-spinners"; // Professional, industrial look
+import { PulseLoader} from "react-spinners"; // Professional, industrial look
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -15,9 +15,9 @@ function App() {
     return (
       <div style={spinnerContainerStyle}>
         {/* Engineering/Oil vibe: Use Steel Blue, Slate, or Safety Orange */}
-        <BarLoader color="#2c3e50" width={150} height={5} />
+        <PulseLoader color="#2c3e50" width={150} height={5} />
         <h2 style={{ marginTop: '20px', fontFamily: 'sans-serif', color: '#2c3e50' }}>
-          BUILDING EXCELLENCE...
+          Crystal Ices
         </h2>
       </div>
     );
