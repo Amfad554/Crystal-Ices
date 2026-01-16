@@ -32,8 +32,8 @@ const Footer = () => {
             <ul className="space-y-3 text-sm">
               <li><NavLink to="/about" className={navLinkStyles}>About Us</NavLink></li>
               <li><NavLink to="/services" className={navLinkStyles}>Services</NavLink></li>
-              <li><NavLink to="/projects" className={navLinkStyles}>Projects</NavLink></li>
-              <li><NavLink to="/equipment" className={navLinkStyles}>Equipment Catalogue</NavLink></li>
+              <li><NavLink to="/project" className={navLinkStyles}>Projects</NavLink></li>
+              <li><NavLink to="/catalogue" className={navLinkStyles}>Equipment Catalogue</NavLink></li>
               <li><NavLink to="/careers" className={navLinkStyles}>Careers</NavLink></li>
             </ul>
           </div>
@@ -57,10 +57,10 @@ const Footer = () => {
               Contact Us
             </h3>
             <ul className="space-y-3 text-sm">
-              <li>📞 +234-XXX-XXXXXX</li>
+              <li>📞 +2348059477264</li>
               <li>
                 <a
-                  href="https://wa.me/234XXXXXXXXXX"
+                  href="https://wa.me/+2348059477264"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-[#00A3A3]"
@@ -68,7 +68,7 @@ const Footer = () => {
                   💬 Chat on WhatsApp
                 </a>
               </li>
-              <li>✉️ info@crystalicesenergies.ng</li>
+              <li>✉️ crystali@crystalicesenergies.ng</li>
               <li>⏰ Mon – Fri: 08:00 – 17:00</li>
             </ul>
           </div>

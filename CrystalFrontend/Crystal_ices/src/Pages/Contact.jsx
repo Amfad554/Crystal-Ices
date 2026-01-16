@@ -50,7 +50,7 @@ const Contact = () => {
   };
 
   // Fixed the Google Maps URL logic
-  const mapAddress = "35 Ikosi Road, Ketu, Lagos, Nigeria";
+  const mapAddress = "12 Oshokoya Ketu, Lagos, Nigeria";
   const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(
     mapAddress
   )}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
@@ -83,7 +83,7 @@ const Contact = () => {
                   <div>
                     <h4 className="font-bold text-[#0B2A4A]">Our Office</h4>
                     <p className="text-gray-600 text-sm">
-                      35 Ikosi Road, Ketu, Lagos State, Nigeria
+                      12 Oshokoya, Ketu, Lagos State, Nigeria
                     </p>
                   </div>
                 </div>
@@ -94,7 +94,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h4 className="font-bold text-[#0B2A4A]">Call Us</h4>
-                    <p className="text-gray-600 text-sm">+234 XXX XXX XXXX</p>
+                    <p className="text-gray-600 text-sm">+234 805 947 7264</p>
                   </div>
                 </div>
 
@@ -117,7 +117,7 @@ const Contact = () => {
                   <div>
                     <h4 className="font-bold text-[#0B2A4A]">WhatsApp</h4>
                     <a
-                      href="https://wa.me/234XXXXXXXXXX"
+                      href="https://wa.me/2348059477264"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#00A3A3] font-medium hover:underline"
