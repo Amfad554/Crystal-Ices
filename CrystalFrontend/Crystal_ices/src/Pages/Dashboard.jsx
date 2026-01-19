@@ -507,33 +507,33 @@ const Dashboard = () => {
                       className="flex-1 px-4 py-2 border rounded-lg text-sm outline-none sm:w-64 focus:border-blue-500"
                       onChange={(e) => setSearch(e.target.value)}
                     />
-                   {["inventory", "staff"].includes(activeTab) && (
-  <button
-    onClick={() => {
-      // 1. Clear any leftover edit ID so the modal knows this is a NEW entry
-      setEditId(null);
-      
-      // 2. Reset the file preview
-      setSelectedFile(null);
-
-      // 3. Clear the text fields so the form is empty
-      setForms({
-        equipment: { name: "", category: "", brand: "", dailyRate: "", region: "", description: "" },
-        staff: { name: "", role: "", specialty: "" }
-      });
-
-      // 4. Finally, open the modal
-      const modalKey = activeTab === "inventory" ? "equipment" : "staff";
-      setModals((prev) => ({
-        ...prev,
-        [modalKey]: true,
-      }));
-    }}
-    className="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-slate-800 transition-colors"
-  >
-    + Add {activeTab === "inventory" ? "Equipment" : "Staff"}
-  </button>
-)}
+                    {["inventory", "staff"].includes(activeTab) && (
+                      <button
+                        onClick={() => {
+                          setEditId(null); // Clear the ID so it's a "New" entry
+                          setSelectedFile(null); // Clear previous file
+                          setForms({
+                            equipment: {
+                              name: "",
+                              category: "Heavy Duty",
+                              brand: "",
+                              dailyRate: "",
+                              region: "Lagos",
+                              description: "",
+                            },
+                            staff: { name: "", role: "", specialty: "" },
+                          });
+                          setModals({
+                            ...modals,
+                            [activeTab === "inventory" ? "equipment" : "staff"]:
+                              true,
+                          });
+                        }}
+                        className="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase"
+                      >
+                        + Add New
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -697,6 +697,45 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+      {/* --- DYNAMIC MODAL LAYER --- */}
+{(modals.equipment || modals.staff) && (
+  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl">
+      <h2 className="text-xl font-black mb-6 uppercase tracking-tight">
+        {editId ? 'Update' : 'Add New'} {modals.equipment ? 'Equipment' : 'Staff'}
+      </h2>
+      
+      <div className="space-y-4">
+        {modals.equipment ? (
+          <>
+            <input className="w-full p-3 bg-slate-50 border rounded-xl" placeholder="Equipment Name" value={forms.equipment.name} onChange={(e) => setForms({...forms, equipment: {...forms.equipment, name: e.target.value}})} />
+            <input className="w-full p-3 bg-slate-50 border rounded-xl" placeholder="Brand" value={forms.equipment.brand} onChange={(e) => setForms({...forms, equipment: {...forms.equipment, brand: e.target.value}})} />
+          </>
+        ) : (
+          <>
+            <input className="w-full p-3 bg-slate-50 border rounded-xl" placeholder="Staff Name" value={forms.staff.name} onChange={(e) => setForms({...forms, staff: {...forms.staff, name: e.target.value}})} />
+            <input className="w-full p-3 bg-slate-50 border rounded-xl" placeholder="Role" value={forms.staff.role} onChange={(e) => setForms({...forms, staff: {...forms.staff, role: e.target.value}})} />
+          </>
+        )}
+
+        <div className="p-4 border-2 border-dashed rounded-xl">
+          <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Upload Photo</p>
+          <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])} className="text-xs" />
+        </div>
+
+        <div className="flex gap-3 pt-4">
+          <button onClick={() => setModals({equipment: false, staff: false})} className="flex-1 py-3 font-bold text-slate-400 uppercase text-xs">Cancel</button>
+          <button 
+            onClick={() => handleAction(modals.equipment ? "equipment" : "staff", editId ? "PUT" : "POST", modals.equipment ? forms.equipment : forms.staff, editId)} 
+            className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs shadow-lg"
+          >
+            {loading ? "Saving..." : "Save Record"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </Layout>
   );
 };
