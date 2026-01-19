@@ -155,58 +155,55 @@ const Dashboard = () => {
   };
   const handleAction = async (type, method, body = null, id = "") => {
     setLoading(true);
-
-    // 1. Determine the correct URL
-    // If editing, we use 'update/id'. If new, we use 'add'.
     let endpoint = method === "PUT" ? `update/${id}` : "add";
     if (method === "DELETE") endpoint = `delete/${id}`;
 
     const url = `${BASE_URL}/api/admin/${type}/${endpoint}`;
 
     try {
-      let options = { method: method };
+      const formData = new FormData();
 
+      // Prepare data safely
       if (method !== "DELETE") {
-        // 2. IMPORTANT: Use FormData for images
-        const formData = new FormData();
-
-        // Append text fields from the body
         Object.keys(body).forEach((key) => {
-          if (body[key] !== null && body[key] !== undefined) {
-            formData.append(key, body[key]);
-          }
+          let val = body[key];
+          // Convert numbers to avoid 500 errors
+          if (key === "dailyRate" && val) val = parseFloat(val);
+          if (val !== null) formData.append(key, val);
         });
 
-        // Append the image file if selected
+        // Change 'image' to whatever your backend Multer name is
         if (selectedFile) {
           formData.append("image", selectedFile);
         }
-
-        options.body = formData;
-        // 3. DO NOT set 'Content-Type' header here.
-        // Letting the browser handle it is required for FormData to work.
-      } else {
-        options.headers = { "Content-Type": "application/json" };
       }
 
-      const res = await fetch(url, options);
-      const json = await res.json();
+      const res = await fetch(url, {
+        method: method,
+        body: method === "DELETE" ? null : formData,
+      });
 
+      // If the server returns 500, this will catch the text explanation
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Server Error Detail:", errorText);
+        throw new Error("Server crashed (500)");
+      }
+
+      const json = await res.json();
       if (json.success) {
-        showToast(`${type} saved to database!`, "success");
-        closeModal(); // Close the popup
-        fetchData(); // Refresh the list
-      } else {
-        showToast(json.message || "Save failed", "danger");
+        showToast("Success!", "success");
+        closeModal();
+        fetchData();
       }
     } catch (err) {
-      console.error("Database Error:", err);
-      showToast("Server connection failed", "danger");
+      showToast("Server Error: Check Fields", "danger");
+      console.log(err);
     } finally {
       setLoading(false);
     }
   };
-  
+
   const startEdit = (item) => {
     setEditId(item.id);
     const targetKey = activeTab === "inventory" ? "equipment" : "staff";
