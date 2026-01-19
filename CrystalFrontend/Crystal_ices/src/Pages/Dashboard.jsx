@@ -156,17 +156,18 @@ const Dashboard = () => {
   const handleAction = async (type, method, body = null, id = "") => {
     setLoading(true);
 
-    // Determine the endpoint based on the method
-    let endpoint = "add";
+    // 1. Determine the correct URL
+    // If editing, we use 'update/id'. If new, we use 'add'.
+    let endpoint = method === "PUT" ? `update/${id}` : "add";
     if (method === "DELETE") endpoint = `delete/${id}`;
-    if (method === "PUT") endpoint = `update/${id}`;
 
     const url = `${BASE_URL}/api/admin/${type}/${endpoint}`;
 
     try {
-      let requestOptions = { method };
+      let options = { method: method };
 
-      if (method === "POST" || method === "PUT") {
+      if (method !== "DELETE") {
+        // 2. IMPORTANT: Use FormData for images
         const formData = new FormData();
 
         // Append text fields from the body
@@ -176,39 +177,36 @@ const Dashboard = () => {
           }
         });
 
-        // Append the image file if a new one was selected
+        // Append the image file if selected
         if (selectedFile) {
           formData.append("image", selectedFile);
         }
 
-        requestOptions.body = formData;
-        // Browser handles Content-Type for FormData
+        options.body = formData;
+        // 3. DO NOT set 'Content-Type' header here.
+        // Letting the browser handle it is required for FormData to work.
       } else {
-        requestOptions.headers = { "Content-Type": "application/json" };
+        options.headers = { "Content-Type": "application/json" };
       }
 
-      const res = await fetch(url, requestOptions);
+      const res = await fetch(url, options);
       const json = await res.json();
 
       if (json.success) {
-        showToast(
-          `${type} successfully ${method === "PUT" ? "updated" : "saved"}`,
-          "success",
-        );
-
-        // Reset all UI states
-        setModals({ equipment: false, staff: false });
-        setEditId(null);
-        setSelectedFile(null);
-        fetchData();
+        showToast(`${type} saved to database!`, "success");
+        closeModal(); // Close the popup
+        fetchData(); // Refresh the list
+      } else {
+        showToast(json.message || "Save failed", "danger");
       }
     } catch (err) {
-      console.error(err);
-      showToast("Operation failed", "danger");
+      console.error("Database Error:", err);
+      showToast("Server connection failed", "danger");
     } finally {
       setLoading(false);
     }
   };
+  
   const startEdit = (item) => {
     setEditId(item.id);
     const targetKey = activeTab === "inventory" ? "equipment" : "staff";
@@ -222,7 +220,23 @@ const Dashboard = () => {
     // Open the correct modal
     setModals({ ...modals, [targetKey]: true });
   };
-
+  const closeModal = () => {
+    setModals({ equipment: false, staff: false });
+    setEditId(null);
+    setSelectedFile(null);
+    // Optional: Reset form fields to empty
+    setForms({
+      equipment: {
+        name: "",
+        category: "Heavy Duty",
+        brand: "",
+        dailyRate: "",
+        region: "Lagos",
+        description: "",
+      },
+      staff: { name: "", role: "", specialty: "" },
+    });
+  };
   const menuItems = [
     {
       id: "overview",
@@ -698,44 +712,112 @@ const Dashboard = () => {
         )}
       </div>
       {/* --- DYNAMIC MODAL LAYER --- */}
-{(modals.equipment || modals.staff) && (
-  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-    <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl">
-      <h2 className="text-xl font-black mb-6 uppercase tracking-tight">
-        {editId ? 'Update' : 'Add New'} {modals.equipment ? 'Equipment' : 'Staff'}
-      </h2>
-      
-      <div className="space-y-4">
-        {modals.equipment ? (
-          <>
-            <input className="w-full p-3 bg-slate-50 border rounded-xl" placeholder="Equipment Name" value={forms.equipment.name} onChange={(e) => setForms({...forms, equipment: {...forms.equipment, name: e.target.value}})} />
-            <input className="w-full p-3 bg-slate-50 border rounded-xl" placeholder="Brand" value={forms.equipment.brand} onChange={(e) => setForms({...forms, equipment: {...forms.equipment, brand: e.target.value}})} />
-          </>
-        ) : (
-          <>
-            <input className="w-full p-3 bg-slate-50 border rounded-xl" placeholder="Staff Name" value={forms.staff.name} onChange={(e) => setForms({...forms, staff: {...forms.staff, name: e.target.value}})} />
-            <input className="w-full p-3 bg-slate-50 border rounded-xl" placeholder="Role" value={forms.staff.role} onChange={(e) => setForms({...forms, staff: {...forms.staff, role: e.target.value}})} />
-          </>
-        )}
+      {(modals.equipment || modals.staff) && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl">
+            <h2 className="text-xl font-black mb-6 uppercase tracking-tight">
+              {editId ? "Update" : "Add New"}{" "}
+              {modals.equipment ? "Equipment" : "Staff"}
+            </h2>
 
-        <div className="p-4 border-2 border-dashed rounded-xl">
-          <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Upload Photo</p>
-          <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])} className="text-xs" />
-        </div>
+            <div className="space-y-4">
+              {modals.equipment ? (
+                <>
+                  <input
+                    className="w-full p-3 bg-slate-50 border rounded-xl"
+                    placeholder="Equipment Name"
+                    value={forms.equipment.name}
+                    onChange={(e) =>
+                      setForms({
+                        ...forms,
+                        equipment: { ...forms.equipment, name: e.target.value },
+                      })
+                    }
+                  />
+                  <input
+                    className="w-full p-3 bg-slate-50 border rounded-xl"
+                    placeholder="Brand"
+                    value={forms.equipment.brand}
+                    onChange={(e) =>
+                      setForms({
+                        ...forms,
+                        equipment: {
+                          ...forms.equipment,
+                          brand: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </>
+              ) : (
+                <>
+                  <input
+                    className="w-full p-3 bg-slate-50 border rounded-xl"
+                    placeholder="Staff Name"
+                    value={forms.staff.name}
+                    onChange={(e) =>
+                      setForms({
+                        ...forms,
+                        staff: { ...forms.staff, name: e.target.value },
+                      })
+                    }
+                  />
+                  <input
+                    className="w-full p-3 bg-slate-50 border rounded-xl"
+                    placeholder="Role"
+                    value={forms.staff.role}
+                    onChange={(e) =>
+                      setForms({
+                        ...forms,
+                        staff: { ...forms.staff, role: e.target.value },
+                      })
+                    }
+                  />
+                </>
+              )}
 
-        <div className="flex gap-3 pt-4">
-          <button onClick={() => setModals({equipment: false, staff: false})} className="flex-1 py-3 font-bold text-slate-400 uppercase text-xs">Cancel</button>
-          <button 
-            onClick={() => handleAction(modals.equipment ? "equipment" : "staff", editId ? "PUT" : "POST", modals.equipment ? forms.equipment : forms.staff, editId)} 
-            className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs shadow-lg"
-          >
-            {loading ? "Saving..." : "Save Record"}
-          </button>
+              <div className="p-4 border-2 border-dashed rounded-xl">
+                <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">
+                  Upload Photo
+                </p>
+                <input
+                  type="file"
+                  onChange={(e) => setSelectedFile(e.target.files[0])}
+                  className="text-xs"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setModals({ equipment: false, staff: false })}
+                  className="flex-1 py-3 font-bold text-slate-400 uppercase text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() =>
+                    handleAction(
+                      modals.equipment ? "equipment" : "staff",
+                      editId ? "PUT" : "POST",
+                      modals.equipment ? forms.equipment : forms.staff,
+                      editId,
+                    )
+                  }
+                  className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs shadow-lg"
+                >
+                  {loading ? "Saving..." : "Save Record"}
+                </button>
+                <button
+                  onClick={closeModal}
+                  className="flex-1 py-3 font-bold text-slate-400 uppercase text-xs"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </Layout>
   );
 };
