@@ -8,11 +8,13 @@ const BASE_URL = "https://crystalbackend.onrender.com";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(() =>
-    JSON.parse(localStorage.getItem("user"))
+    JSON.parse(localStorage.getItem("user")),
   );
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [editId, setEditId] = useState(null); // Tracks the ID of the item being edited
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -59,7 +61,7 @@ const Dashboard = () => {
     setToast({ show: true, message: msg, type });
     setTimeout(
       () => setToast({ show: false, message: "", type: "info" }),
-      3000
+      3000,
     );
   };
 
@@ -91,6 +93,7 @@ const Dashboard = () => {
         else if (activeTab === "applications") setApplications(json.data);
       }
     } catch (err) {
+      console.log(err);
       showToast("Sync with Database Failed", "danger");
     }
     setLoading(false);
@@ -115,7 +118,7 @@ const Dashboard = () => {
             name: profileData.name,
             email: profileData.email,
           }),
-        }
+        },
       );
       const json = await res.json();
       if (json.success) {
@@ -125,6 +128,7 @@ const Dashboard = () => {
         showToast("Profile Updated Successfully", "success");
       }
     } catch (err) {
+      console.log(err);
       showToast("Server Connection Error", "danger");
     } finally {
       setLoading(false);
@@ -144,28 +148,79 @@ const Dashboard = () => {
         fetchData();
       }
     } catch (err) {
+      console.log(err);
+
       showToast("Update failed", "danger");
     }
   };
-
   const handleAction = async (type, method, body = null, id = "") => {
-    const endpoint = method === "DELETE" ? `delete/${id}` : "add";
-    // Updated to use Render BASE_URL
+    setLoading(true);
+
+    // Determine the endpoint based on the method
+    let endpoint = "add";
+    if (method === "DELETE") endpoint = `delete/${id}`;
+    if (method === "PUT") endpoint = `update/${id}`;
+
     const url = `${BASE_URL}/api/admin/${type}/${endpoint}`;
+
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: body ? JSON.stringify(body) : null,
-      });
-      if (res.ok) {
-        showToast(`${type} updated`);
+      let requestOptions = { method };
+
+      if (method === "POST" || method === "PUT") {
+        const formData = new FormData();
+
+        // Append text fields from the body
+        Object.keys(body).forEach((key) => {
+          if (body[key] !== null && body[key] !== undefined) {
+            formData.append(key, body[key]);
+          }
+        });
+
+        // Append the image file if a new one was selected
+        if (selectedFile) {
+          formData.append("image", selectedFile);
+        }
+
+        requestOptions.body = formData;
+        // Browser handles Content-Type for FormData
+      } else {
+        requestOptions.headers = { "Content-Type": "application/json" };
+      }
+
+      const res = await fetch(url, requestOptions);
+      const json = await res.json();
+
+      if (json.success) {
+        showToast(
+          `${type} successfully ${method === "PUT" ? "updated" : "saved"}`,
+          "success",
+        );
+
+        // Reset all UI states
         setModals({ equipment: false, staff: false });
+        setEditId(null);
+        setSelectedFile(null);
         fetchData();
       }
     } catch (err) {
+      console.error(err);
       showToast("Operation failed", "danger");
+    } finally {
+      setLoading(false);
     }
+  };
+  const startEdit = (item) => {
+    setEditId(item.id);
+    const targetKey = activeTab === "inventory" ? "equipment" : "staff";
+
+    // Pre-fill the form state with existing data
+    setForms({
+      ...forms,
+      [targetKey]: { ...item },
+    });
+
+    // Open the correct modal
+    setModals({ ...modals, [targetKey]: true });
   };
 
   const menuItems = [
@@ -440,12 +495,10 @@ const Dashboard = () => {
             ].includes(activeTab) && (
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div className="p-4 lg:p-6 border-b border-slate-100 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50/50">
-                  <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">
-                    {activeTab === "subscribers"
-                      ? "Newsletter Subscribers"
-                      : activeTab === "applications"
-                      ? "Job Applications"
-                      : `${activeTab} Records`}
+                  <h3 className="text-xl font-black text-slate-800 mb-6 uppercase tracking-tight">
+                    {editId
+                      ? `Edit ${activeTab === "inventory" ? "Equipment" : "Personnel"}`
+                      : `Add New ${activeTab === "inventory" ? "Equipment" : "Personnel"}`}
                   </h3>
                   <div className="flex w-full sm:w-auto gap-2">
                     <input
@@ -454,21 +507,33 @@ const Dashboard = () => {
                       className="flex-1 px-4 py-2 border rounded-lg text-sm outline-none sm:w-64 focus:border-blue-500"
                       onChange={(e) => setSearch(e.target.value)}
                     />
-                    {["inventory", "staff"].includes(activeTab) && (
-                      <button
-                        onClick={() =>
-                          setModals((prev) => ({
-                            ...prev,
-                            [activeTab === "inventory"
-                              ? "equipment"
-                              : "staff"]: true,
-                          }))
-                        }
-                        className="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase"
-                      >
-                        + Add
-                      </button>
-                    )}
+                   {["inventory", "staff"].includes(activeTab) && (
+  <button
+    onClick={() => {
+      // 1. Clear any leftover edit ID so the modal knows this is a NEW entry
+      setEditId(null);
+      
+      // 2. Reset the file preview
+      setSelectedFile(null);
+
+      // 3. Clear the text fields so the form is empty
+      setForms({
+        equipment: { name: "", category: "", brand: "", dailyRate: "", region: "", description: "" },
+        staff: { name: "", role: "", specialty: "" }
+      });
+
+      // 4. Finally, open the modal
+      const modalKey = activeTab === "inventory" ? "equipment" : "staff";
+      setModals((prev) => ({
+        ...prev,
+        [modalKey]: true,
+      }));
+    }}
+    className="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-slate-800 transition-colors"
+  >
+    + Add {activeTab === "inventory" ? "Equipment" : "Staff"}
+  </button>
+)}
                   </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -479,15 +544,15 @@ const Dashboard = () => {
                           {activeTab === "subscribers"
                             ? "Email Address"
                             : activeTab === "applications"
-                            ? "Applicant"
-                            : "Name / Primary"}
+                              ? "Applicant"
+                              : "Name / Primary"}
                         </th>
                         <th className="px-6 py-4">
                           {activeTab === "subscribers"
                             ? "Joined"
                             : activeTab === "applications"
-                            ? "Role / CV"
-                            : "Category/Role"}
+                              ? "Role / CV"
+                              : "Category/Role"}
                         </th>
                         <th className="px-6 py-4 text-right">Actions</th>
                       </tr>
@@ -496,12 +561,12 @@ const Dashboard = () => {
                       {(activeTab === "inventory"
                         ? equipment
                         : activeTab === "staff"
-                        ? staff
-                        : activeTab === "subscribers"
-                        ? subscribers
-                        : activeTab === "applications"
-                        ? applications
-                        : inquiries
+                          ? staff
+                          : activeTab === "subscribers"
+                            ? subscribers
+                            : activeTab === "applications"
+                              ? applications
+                              : inquiries
                       )
                         .filter((item) =>
                           (
@@ -512,7 +577,7 @@ const Dashboard = () => {
                             ""
                           )
                             .toLowerCase()
-                            .includes(search.toLowerCase())
+                            .includes(search.toLowerCase()),
                         )
                         .map((item) => (
                           <tr
@@ -524,8 +589,8 @@ const Dashboard = () => {
                                 {activeTab === "applications"
                                   ? item.applicantName
                                   : activeTab === "subscribers"
-                                  ? item.email
-                                  : item.name || item.fullName}
+                                    ? item.email
+                                    : item.name || item.fullName}
                               </div>
                               <div className="text-xs text-slate-400 truncate max-w-[150px]">
                                 {activeTab === "applications"
@@ -534,31 +599,25 @@ const Dashboard = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              {activeTab === "applications" ? (
-                                <div className="flex flex-col">
-                                  <span className="text-[10px] font-bold text-blue-600 uppercase">
-                                    {item.roleApplied}
-                                  </span>
-                                  <a
-                                    href={item.cvLink}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-[10px] text-slate-400 underline hover:text-blue-600"
-                                  >
-                                    Download CV
-                                  </a>
+                              <div className="flex items-center gap-3">
+                                {/* Display the image if it exists, otherwise show a placeholder */}
+                                <img
+                                  src={
+                                    item.imageUrl ||
+                                    "https://via.placeholder.com/40"
+                                  }
+                                  alt=""
+                                  className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                                />
+                                <div>
+                                  <div className="font-bold text-slate-800 text-sm">
+                                    {item.name || item.fullName}
+                                  </div>
+                                  <div className="text-xs text-slate-400">
+                                    {item.brand || item.specialty}
+                                  </div>
                                 </div>
-                              ) : (
-                                <span className="text-[10px] font-bold px-3 py-1 bg-slate-100 rounded-full text-slate-600 uppercase">
-                                  {activeTab === "subscribers"
-                                    ? new Date(
-                                        item.createdAt
-                                      ).toLocaleDateString()
-                                    : item.category ||
-                                      item.role ||
-                                      item.service}
-                                </span>
-                              )}
+                              </div>
                             </td>
                             <td className="px-6 py-4 text-right">
                               {activeTab === "inquiries" ? (
@@ -567,7 +626,7 @@ const Dashboard = () => {
                                   onChange={(e) =>
                                     handleStatusUpdate(item.id, e.target.value)
                                   }
-                                  className="text-[10px] font-bold px-2 py-1 rounded border bg-white"
+                                  className="text-[10px] font-bold px-2 py-1 rounded border bg-white outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                   <option value="PENDING">PENDING</option>
                                   <option value="PROCESSING">PROCESSING</option>
@@ -578,30 +637,42 @@ const Dashboard = () => {
                                   onClick={() =>
                                     showToast("Application Accepted", "success")
                                   }
-                                  className="bg-green-600 text-white px-3 py-1 rounded text-[10px] font-bold hover:bg-green-700"
+                                  className="bg-green-600 text-white px-3 py-1 rounded text-[10px] font-bold hover:bg-green-700 transition-colors"
                                 >
                                   ACCEPT
                                 </button>
                               ) : activeTab === "subscribers" ? (
-                                <span className="text-[10px] text-slate-400 italic">
-                                  SYSTEM RECORD
+                                <span className="text-[10px] text-slate-400 italic font-medium uppercase tracking-widest">
+                                  System Record
                                 </span>
                               ) : (
-                                <button
-                                  onClick={() =>
-                                    handleAction(
-                                      activeTab === "inventory"
-                                        ? "equipment"
-                                        : "staff",
-                                      "DELETE",
-                                      null,
-                                      item.id
-                                    )
-                                  }
-                                  className="text-red-500 font-black text-[10px] hover:underline"
-                                >
-                                  REMOVE
-                                </button>
+                                /* This section handles Staff and Inventory */
+                                <div className="flex justify-end items-center gap-4">
+                                  {/* NEW EDIT BUTTON */}
+                                  <button
+                                    onClick={() => startEdit(item)}
+                                    className="text-blue-600 font-bold text-[10px] hover:text-blue-800 transition-colors uppercase tracking-wider"
+                                  >
+                                    Edit
+                                  </button>
+
+                                  {/* EXISTING REMOVE BUTTON */}
+                                  <button
+                                    onClick={() =>
+                                      handleAction(
+                                        activeTab === "inventory"
+                                          ? "equipment"
+                                          : "staff",
+                                        "DELETE",
+                                        null,
+                                        item.id,
+                                      )
+                                    }
+                                    className="text-red-500 font-black text-[10px] hover:text-red-700 transition-colors uppercase tracking-wider"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
                               )}
                             </td>
                           </tr>
