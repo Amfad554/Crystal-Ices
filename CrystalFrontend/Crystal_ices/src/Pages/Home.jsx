@@ -32,12 +32,6 @@ const Home = () => {
   const [submitted, setSubmitted] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // --- AI CHAT STATE ---
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMessage, setChatMessage] = useState("");
-  const [chatHistory, setChatHistory] = useState([
-    { role: "assistant", content: "Hello! I'm your Crystal industrial assistant. How can I help you with procurement or consultancy today?" }
-  ]);
   const chatEndRef = useRef(null);
 
   // --- 2. DATA ARRAYS ---
@@ -101,11 +95,6 @@ const Home = () => {
     return () => clearInterval(timer);
   }, [sliderData.length]);
 
-  // Auto-scroll chat to bottom
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatHistory]);
-
   const handleSearch = (e) => {
     e.preventDefault();
     const params = new URLSearchParams({
@@ -155,36 +144,7 @@ const Home = () => {
     }
   };
 
-const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!chatMessage.trim()) return;
 
-    // 1. Add user message to history
-    const userMsg = chatMessage.toLowerCase();
-    const newHistory = [...chatHistory, { role: "user", content: chatMessage }];
-    setChatHistory(newHistory);
-    setChatMessage("");
-
-    // 2. Simple Dynamic Logic (until you add backend AI)
-    setTimeout(() => {
-      let aiResponse = "I'm not sure about that. Would you like to speak with one of our engineers?";
-
-      if (userMsg.includes("price") || userMsg.includes("cost") || userMsg.includes("quote")) {
-        aiResponse = "For pricing and formal quotes, please use the 'Request a Quote' form on this page or email sales@crystal.com.";
-      } else if (userMsg.includes("excavator") || userMsg.includes("machine") || userMsg.includes("equipment")) {
-        aiResponse = "We have a wide range of heavy machinery available. You can view them in our 'Equipment Catalogue' link above.";
-      } else if (userMsg.includes("hello") || userMsg.includes("hi")) {
-        aiResponse = "Hello! I am the Crystal Assistant. How can I help you with your industrial or energy project today?";
-      } else if (userMsg.includes("location") || userMsg.includes("office") || userMsg.includes("lagos")) {
-        aiResponse = "Our main operations are based in Lagos, covering both the Mainland and Island regions.";
-      }
-
-      setChatHistory(prev => [...prev, { 
-        role: "assistant", 
-        content: aiResponse 
-      }]);
-    }, 800);
-  };
 
   return (
     <Layout>
@@ -618,81 +578,6 @@ const handleSendMessage = (e) => {
             </div>
           </div>
         </section>
-
-        {/* --- FLOATING AI ASSISTANT --- */}
-        <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end">
-          {/* Chat Window */}
-          {isChatOpen && (
-            <div className="w-[350px] md:w-[400px] h-[500px] bg-white rounded-3xl shadow-2xl border border-slate-100 mb-4 flex flex-col overflow-hidden animate-in slide-in-from-bottom-5">
-              {/* Header */}
-              <div className="bg-slate-900 p-6 text-white flex justify-between items-center">
-                <div>
-                  <h4 className="font-bold text-sm">Crystal Support</h4>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    <span className="text-[10px] text-slate-400">Online | AI Assistant</span>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setIsChatOpen(false)}
-                  className="text-slate-400 hover:text-white transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50">
-                {chatHistory.map((msg, i) => (
-                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[80%] p-3 rounded-2xl text-xs leading-relaxed ${
-                      msg.role === 'user' 
-                      ? 'bg-blue-600 text-white rounded-br-none' 
-                      : 'bg-white text-slate-700 shadow-sm border border-slate-200 rounded-bl-none'
-                    }`}>
-                      {msg.content}
-                    </div>
-                  </div>
-                ))}
-                <div ref={chatEndRef} />
-              </div>
-
-              {/* Input Area */}
-              <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-slate-100 flex gap-2">
-                <input 
-                  type="text"
-                  placeholder="Ask about machinery..."
-                  className="flex-1 bg-slate-100 border-none rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-blue-600 outline-none"
-                  value={chatMessage}
-                  onChange={(e) => setChatMessage(e.target.value)}
-                />
-                <button 
-                  type="submit"
-                  className="bg-slate-900 text-white p-2 rounded-xl hover:bg-blue-600 transition-colors"
-                >
-                  <svg className="w-4 h-4 rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                  </svg>
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* Toggle Button */}
-          <button 
-            onClick={() => setIsChatOpen(!isChatOpen)}
-            className="w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group"
-          >
-            {isChatOpen ? (
-              <span className="text-2xl">↓</span>
-            ) : (
-              <div className="relative">
-                <span className="text-2xl">💬</span>
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full"></span>
-              </div>
-            )}
-          </button>
-        </div>
       </main>
     </Layout>
   );
