@@ -63,7 +63,7 @@ const Home = () => {
       name: "Engr. Ikechukwu Opia",
       role: "CEO & Founder",
       specialty: "Energy Infrastructure",
-      img: "https://res.cloudinary.com/debum5mhu/image/upload/v1769094466/ceo_q0gojr.jpg0",
+      img: "https://res.cloudinary.com/debum5mhu/image/upload/v1769094466/ceo_q0gojr.jpg",
     },
     {
       name: "George Chiamaka",
