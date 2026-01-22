@@ -155,24 +155,32 @@ const Dashboard = () => {
   };
   const handleAction = async (type, method, body = null, id = "") => {
     setLoading(true);
+
+    // 1. Correct URL logic
     let endpoint = method === "PUT" ? `update/${id}` : "add";
     if (method === "DELETE") endpoint = `delete/${id}`;
-
     const url = `${BASE_URL}/api/admin/${type}/${endpoint}`;
 
     try {
       const formData = new FormData();
 
-      // Prepare data safely
       if (method !== "DELETE") {
+        // 2. Data Cleaning - This prevents 500 errors
         Object.keys(body).forEach((key) => {
-          let val = body[key];
-          // Convert numbers to avoid 500 errors
-          if (key === "dailyRate" && val) val = parseFloat(val);
-          if (val !== null) formData.append(key, val);
+          let value = body[key];
+
+          // Convert dailyRate to a real number
+          if (key === "dailyRate" && value) {
+            value = parseFloat(value);
+          }
+
+          // Only append if there is a value
+          if (value !== null && value !== undefined && value !== "") {
+            formData.append(key, value);
+          }
         });
 
-        // Change 'image' to whatever your backend Multer name is
+        // 3. Image Append
         if (selectedFile) {
           formData.append("image", selectedFile);
         }
@@ -181,24 +189,22 @@ const Dashboard = () => {
       const res = await fetch(url, {
         method: method,
         body: method === "DELETE" ? null : formData,
+        // NOTE: Do NOT set Content-Type header here for FormData
       });
 
-      // If the server returns 500, this will catch the text explanation
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Server Error Detail:", errorText);
-        throw new Error("Server crashed (500)");
-      }
-
       const json = await res.json();
+
       if (json.success) {
-        showToast("Success!", "success");
-        closeModal();
-        fetchData();
+        showToast(`${type} updated successfully!`, "success");
+        closeModal(); // This uses the new close function
+        fetchData(); // Refresh your table
+      } else {
+        // This will show you the ACTUAL error from the server
+        showToast(json.message || "Database rejected request", "danger");
       }
     } catch (err) {
-      showToast("Server Error: Check Fields", "danger");
-      console.log(err);
+      console.error("Save Error:", err);
+      showToast("Server Error: Check your connection", "danger");
     } finally {
       setLoading(false);
     }
@@ -221,7 +227,7 @@ const Dashboard = () => {
     setModals({ equipment: false, staff: false });
     setEditId(null);
     setSelectedFile(null);
-    // Optional: Reset form fields to empty
+    // This clears the inputs so they aren't full next time you open the modal
     setForms({
       equipment: {
         name: "",
@@ -785,12 +791,6 @@ const Dashboard = () => {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button
-                  onClick={() => setModals({ equipment: false, staff: false })}
-                  className="flex-1 py-3 font-bold text-slate-400 uppercase text-xs"
-                >
-                  Cancel
-                </button>
                 <button
                   onClick={() =>
                     handleAction(

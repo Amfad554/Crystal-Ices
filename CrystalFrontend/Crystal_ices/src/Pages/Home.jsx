@@ -66,16 +66,16 @@ const Home = () => {
 
   const staffMembers = [
     {
-      name: "Engr. Adebayo Benson",
-      role: "Chief Technical Officer",
+      name: "Engr. Ikechukwu Opia",
+      role: "CEO & Founder",
       specialty: "Energy Infrastructure",
-      img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400&h=500",
+      img: "https://res.cloudinary.com/debum5mhu/image/upload/v1769094466/ceo_q0gojr.jpg0",
     },
     {
-      name: "Sarah Okonjo",
-      role: "Head of Procurement",
+      name: "George Chiamaka",
+      role: "Director of Research & Development",
       specialty: "Global Supply Chain",
-      img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400&h=500",
+      img: "https://res.cloudinary.com/debum5mhu/image/upload/v1769094441/staff_xitwfj.jpg",
     },
     {
       name: "Marcus Tunde",
