@@ -96,11 +96,11 @@ const Home = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) =>
-      prev === sliderData.length - 1 ? 0 : prev + 1
+        prev === sliderData.length - 1 ? 0 : prev + 1,
       );
     }, 5000);
     return () => clearInterval(timer);
-  }, [sliderData.length]);
+  }, []); // Empty array is fine now because sliderData is static and outside the effect
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -212,21 +212,21 @@ const Home = () => {
                   </div>
                 </div>
               ))}
-                <div className="absolute bottom-10 right-10 flex gap-3 z-20">
-                  {sliderData.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setCurrentSlide(i)}
-                      className={`h-1.5 transition-all rounded-full ${
-                        i === currentSlide
-                          ? "w-12 bg-blue-500"
-                          : "w-4 bg-white/30"
-                      }`}
-                    />
-                  ))}
-                </div>
+              <div className="absolute bottom-10 right-10 flex gap-3 z-20">
+                {sliderData.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentSlide(i)}
+                    className={`h-1.5 transition-all rounded-full ${
+                      i === currentSlide
+                        ? "w-12 bg-blue-500"
+                        : "w-4 bg-white/30"
+                    }`}
+                  />
+                ))}
               </div>
             </div>
+          </div>
         </section>
 
         {/* --- 2. EQUIPMENT QUICK SEARCH --- */}
@@ -367,9 +367,12 @@ const Home = () => {
               <h2 className="text-3xl font-bold text-slate-900">
                 Featured Projects
               </h2>
-              <button className="text-blue-600 font-bold text-sm uppercase tracking-widest border-b-2 border-blue-600 pb-1">
+              <Link
+                to="/projects"
+                className="text-blue-600 font-bold text-sm uppercase tracking-widest border-b-2 border-blue-600 pb-1 hover:text-blue-800 hover:border-blue-800 transition-colors inline-block"
+              >
                 All Projects
-              </button>
+              </Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
