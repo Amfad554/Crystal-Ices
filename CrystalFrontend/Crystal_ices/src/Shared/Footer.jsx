@@ -1,9 +1,23 @@
 import { NavLink } from 'react-router-dom';
+// Import the icons
+import { Facebook, Instagram, Linkedin, Twitter } from 'lucide-react';
 
 const Footer = () => {
-  // Helper to keep the code clean for active styling
   const navLinkStyles = ({ isActive }) => 
     isActive ? "text-[#00A3A3] font-medium" : "hover:text-[#00A3A3] transition-colors";
+
+  // Social Link Component for reusability
+  const SocialLink = ({ href, icon: Icon, label }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="bg-gray-800 p-2 rounded-full hover:bg-[#00A3A3] hover:text-white transition-all duration-300 text-gray-400"
+      aria-label={label}
+    >
+      <Icon size={18} />
+    </a>
+  );
 
   return (
     <footer className="bg-[#0B2A4A] text-gray-300 pt-16">
@@ -13,20 +27,25 @@ const Footer = () => {
           {/* Company Info */}
           <div>
             <h2 className="text-2xl font-bold text-white mb-4">
-              Crystal Ices Energies Nigeria Limited
+              Crystal Ices Energies
             </h2>
             <p className="text-sm leading-relaxed mb-6">
               Consultancy, procurement and equipment solutions for oil & gas
               infrastructure, heavy machinery and industrial real estate.
             </p>
-            <p className="text-sm">
-              Ketu, Lagos, Nigeria
-            </p>
+            
+            {/* Social Media Icons */}
+            <div className="flex gap-4">
+              <SocialLink href="https://www.linkedin.com/in/crystalices-energies-limited-8838a93a7?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" icon={Linkedin} label="LinkedIn" />
+              <SocialLink href="https://facebook.com/yourhandle" icon={Facebook} label="Facebook" />
+              <SocialLink href="https://twitter.com/yourhandle" icon={Twitter} label="X (Twitter)" />
+              <SocialLink href="https://instagram.com/yourhandle" icon={Instagram} label="Instagram" />
+            </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-4">
+            <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">
               Quick Links
             </h3>
             <ul className="space-y-3 text-sm">
@@ -38,37 +57,38 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Services - Static list or can be NavLinks too */}
+          {/* Services */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-4">
+            <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">
               Our Services
             </h3>
             <ul className="space-y-3 text-sm">
-              <li>Consultancy & Project Management</li>
-              <li>Oil & Gas Equipment Procurement</li>
-              <li>Heavy Duty Machinery (Sales & Rental)</li>
-              <li>Industrial & Energy Real Estate</li>
+              <li className="hover:text-white transition-colors cursor-default">Consultancy & Project Management</li>
+              <li className="hover:text-white transition-colors cursor-default">Oil & Gas Equipment Procurement</li>
+              <li className="hover:text-white transition-colors cursor-default">Heavy Duty Machinery</li>
+              <li className="hover:text-white transition-colors cursor-default">Industrial & Energy Real Estate</li>
             </ul>
           </div>
 
-          {/* Contact - Keep external links as <a> tags */}
+          {/* Contact */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-4">
+            <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">
               Contact Us
             </h3>
             <ul className="space-y-3 text-sm">
-              <li>📞 +2348059477264</li>
+              <li>📞 +234 805 947 7264</li>
               <li>
                 <a
                   href="https://wa.me/+2348059477264"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#00A3A3]"
+                  className="flex items-center gap-2 hover:text-[#00A3A3] transition-colors"
                 >
-                  💬 Chat on WhatsApp
+                  <span className="text-lg">💬</span> Chat on WhatsApp
                 </a>
               </li>
-              <li>✉️ crystali@crystalicesenergies.ng</li>
+              <li className="break-all">✉️ crystali@crystalicesenergies.ng</li>
+              <li>📍 Ketu, Lagos, Nigeria</li>
               <li>⏰ Mon – Fri: 08:00 – 17:00</li>
             </ul>
           </div>
@@ -76,20 +96,15 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-700 py-6 flex flex-col md:flex-row justify-between items-center text-sm">
+        <div className="border-t border-gray-800 py-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
           <p className="mb-4 md:mb-0">
-            © {new Date().getFullYear()} Crystal Ices Energies Nigeria Limited. All rights reserved.
+            © {new Date().getFullYear()} Crystal Ices Energies Nigeria Limited.
           </p>
           <div className="flex gap-6">
-            <NavLink to="/privacy-policy" className={navLinkStyles}>
-              Privacy Policy
-            </NavLink>
-            <NavLink to="/terms" className={navLinkStyles}>
-              Terms & Conditions
-            </NavLink>
+            <NavLink to="/privacy-policy" className="hover:text-[#00A3A3]">Privacy Policy</NavLink>
+            <NavLink to="/terms" className="hover:text-[#00A3A3]">Terms & Conditions</NavLink>
           </div>
         </div>
-
       </div>
     </footer>
   );
