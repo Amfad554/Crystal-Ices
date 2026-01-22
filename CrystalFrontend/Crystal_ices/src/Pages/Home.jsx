@@ -10,6 +10,7 @@ import slide1 from "/images/oil.jpg";
 import slide2 from "/images/machine.jpg";
 import slide3 from "/images/refinary2.jpg";
 import slide4 from "/images/construction2.avif";
+import slide5 from "/images/building2.jpg";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -54,6 +55,11 @@ const Home = () => {
     {
       img: slide4,
       title: "Infrastructure",
+      desc: "Building the future of industrial real estate.",
+    },
+     {
+      img: slide5,
+      title: "Real Estate",
       desc: "Building the future of industrial real estate.",
     },
   ];
