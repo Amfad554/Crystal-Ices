@@ -155,7 +155,6 @@ const Home = () => {
 
   return (
     <Layout>
-      .:::::
       <main className="min-h-screen font-sans text-slate-900 bg-white relative">
         {/* --- 1. HERO SECTION --- */}
         <section className="pt-24 pb-20 bg-slate-900 text-white px-6">
