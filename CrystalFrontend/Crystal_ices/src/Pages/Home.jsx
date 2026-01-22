@@ -12,7 +12,8 @@ import slide1 from "/images/oil.jpg";
 import slide2 from "/images/machine.jpg";
 import slide3 from "/images/refinary2.jpg";
 import slide4 from "/images/construction2.avif";
-import slide5 from "/images/building2.jpg";
+import slide5 from "/images/building2.jpeg"
+
 
 const Home = () => {
   const navigate = useNavigate();
@@ -154,7 +155,7 @@ const Home = () => {
 
   return (
     <Layout>
-      .:::::,
+      .:::::
       <main className="min-h-screen font-sans text-slate-900 bg-white relative">
         {/* --- 1. HERO SECTION --- */}
         <section className="pt-24 pb-20 bg-slate-900 text-white px-6">
