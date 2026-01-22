@@ -56,7 +56,7 @@ const About = () => {
             <img
               src="https://res.cloudinary.com/debum5mhu/image/upload/v1769094466/ceo_q0gojr.jpg"
               alt="CEO"
-              className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500"
+              className="w-[50%] h-[50%] object-cover object-top hover:scale-105 transition-transform duration-500"
             />
           </div>
         </section>
