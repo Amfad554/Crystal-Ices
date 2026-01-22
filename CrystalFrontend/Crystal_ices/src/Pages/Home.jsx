@@ -386,10 +386,10 @@ const Home = () => {
                   img: "https://images.unsplash.com/photo-1521510895919-46920266ddb3?auto=format&fit=crop&q=80&w=800",
                 },
                 {
-                  title: "Machinery Fleet",
+                  title: "Real Estate Development",
                   tags: "Construction",
                   result: "24-Hour Deployment",
-                  img: "https://images.unsplash.com/photo-1579165466541-74e2b70a11d3?q=80&w=1470&auto=format&fit=crop",
+                  img: "https://res.cloudinary.com/debum5mhu/image/upload/v1769094589/building5_ra9tmx.jpg",
                 },
               ].map((project, i) => (
                 <div
