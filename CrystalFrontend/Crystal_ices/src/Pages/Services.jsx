@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "../Shared/Layout/Layout";
+import { HashLink as Link } from 'react-router-hash-link';
 
 const Services = () => {
   const [selectedService, setSelectedService] = useState(null);
@@ -227,27 +228,15 @@ const Services = () => {
                       Consult with our engineering team regarding your specific
                       project requirements.
                     </p>
-                    <button
-                      type="button" // This prevents the page from refreshing if inside a form
-                      onClick={(e) => {
-                        e.preventDefault();
-                        const element =
-                          document.getElementById("quotation-section");
-                        if (element) {
-                          element.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
-                          });
-                        } else {
-                          console.error(
-                            "Could not find element with id: quotation-section",
-                          );
-                        }
-                      }}
-                      className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-blue-700 transition-all mb-4"
+                    <Link
+                      smooth
+                      to="#quotation-section"
+                      className="w-full block"
                     >
-                      Request Quotation
-                    </button>
+                      <button className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-blue-700 transition-all mb-4">
+                        Request Quotation
+                      </button>
+                    </Link>
                     <div className="pt-6 border-t border-slate-200">
                       <p className="text-xs text-slate-400 font-bold uppercase mb-2">
                         Technical Standards
