@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, useRef } from "react"; // Added useRef
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
@@ -57,7 +58,7 @@ const Home = () => {
       title: "Infrastructure",
       desc: "Building the future of industrial real estate.",
     },
-     {
+    {
       img: slide5,
       title: "Real Estate",
       desc: "Building the future of industrial real estate.",
@@ -95,7 +96,7 @@ const Home = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) =>
-        prev === sliderData.length - 1 ? 0 : prev + 1
+      prev === sliderData.length - 1 ? 0 : prev + 1
       );
     }, 5000);
     return () => clearInterval(timer);
@@ -149,8 +150,6 @@ const Home = () => {
       setLoading(false);
     }
   };
-
-
 
   return (
     <Layout>
@@ -213,21 +212,21 @@ const Home = () => {
                   </div>
                 </div>
               ))}
-              <div className="absolute bottom-10 right-10 flex gap-3 z-20">
-                {sliderData.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentSlide(i)}
-                    className={`h-1.5 transition-all rounded-full ${
-                      i === currentSlide
-                        ? "w-12 bg-blue-500"
-                        : "w-4 bg-white/30"
-                    }`}
-                  />
-                ))}
+                <div className="absolute bottom-10 right-10 flex gap-3 z-20">
+                  {sliderData.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentSlide(i)}
+                      className={`h-1.5 transition-all rounded-full ${
+                        i === currentSlide
+                          ? "w-12 bg-blue-500"
+                          : "w-4 bg-white/30"
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
         </section>
 
         {/* --- 2. EQUIPMENT QUICK SEARCH --- */}
