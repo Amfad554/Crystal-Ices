@@ -227,11 +227,16 @@ const Services = () => {
                       Consult with our engineering team regarding your specific
                       project requirements.
                     </p>
-                    <a href="#quotation-section" className="w-full block">
-                      <button className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-blue-700 transition-all mb-4">
-                        Request Quotation
-                      </button>
-                    </a>
+                    <button
+                      onClick={() => {
+                        const element =
+                          document.getElementById("quotation-section");
+                        element?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-blue-700 transition-all mb-4"
+                    >
+                      Request Quotation
+                    </button>
                     <div className="pt-6 border-t border-slate-200">
                       <p className="text-xs text-slate-400 font-bold uppercase mb-2">
                         Technical Standards
