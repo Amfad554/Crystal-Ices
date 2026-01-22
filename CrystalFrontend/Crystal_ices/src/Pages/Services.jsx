@@ -39,7 +39,7 @@ const Services = () => {
       id: 3,
       title: "Heavy Duty Machinery",
       icon: "🏗️",
-      mainImage: "https://images.unsplash.com/photo-1532323544230-7191fd51bc1b?auto=format&fit=crop&q=80&w=800",
+      mainImage: "https://images.unsplash.com/photo-1516216628859-9bccecab13ca?auto=format&fit=crop&q=80&w=800",
       description: "Sales and rental solutions for industrial machinery.",
       fullContent: {
         intro: "Our fleet provides the backbone for Lagos's biggest construction and energy projects, featuring maintained plant equipment and expert operators.",
