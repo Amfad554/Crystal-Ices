@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react"; // Added useRef
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
 
+
 // --- CENTRALIZED API CONFIG ---
 const BASE_URL = "https://crystalbackend.onrender.com";
 
@@ -153,6 +154,7 @@ const Home = () => {
 
   return (
     <Layout>
+      .:::::,
       <main className="min-h-screen font-sans text-slate-900 bg-white relative">
         {/* --- 1. HERO SECTION --- */}
         <section className="pt-24 pb-20 bg-slate-900 text-white px-6">
