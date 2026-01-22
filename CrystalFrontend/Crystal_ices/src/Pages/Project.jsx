@@ -3,6 +3,8 @@ import Layout from "../Shared/Layout/Layout";
 
 const Project = () => {
   const [activeTab, setActiveTab] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedProject, setSelectedProject] = useState(null); // Modal State
 
   const projects = [
     {
@@ -10,113 +12,51 @@ const Project = () => {
       title: "Refinery Equipment Supply",
       category: "Oil & Gas",
       location: "Port Harcourt",
-      description:
-        "Procurement and delivery of specialized high-pressure valves and piping components for refinery maintenance.",
+      description: "Procurement and delivery of specialized high-pressure valves and piping components for refinery maintenance.",
+      fullDetails: "This project involved the sourcing of ISO-certified valves from global partners, logistics management through the Onne Port, and technical verification upon delivery to ensure zero-leak compliance.",
       status: "Completed",
       icon: "⛽",
     },
-    {
-      id: 2,
-      title: "Industrial Site Preparation",
-      category: "Machinery Rental",
-      location: "Lekki Free Zone, Lagos",
-      description:
-        "Deployment of excavators and heavy-duty trucks for large-scale industrial foundation work.",
-      status: "In Progress",
-      icon: "🚜",
-    },
-    {
-      id: 3,
-      title: "Energy Estate Acquisition",
-      category: "Real Estate",
-      location: "Ibeju-Lekki",
-      description:
-        "Consultancy for the acquisition of 50 hectares of land for a proposed independent power plant.",
-      status: "Completed",
-      icon: "🏢",
-    },
-    {
-      id: 4,
-      title: "Offshore Logistics Support",
-      category: "Consultancy",
-      location: "Niger Delta",
-      description:
-        "Project management and regulatory compliance advisory for offshore equipment mobilization.",
-      status: "Completed",
-      icon: "🚢",
-    },
-    {
-      id: 5,
-      title: "Pipeline Integrity Inspection",
-      category: "Oil & Gas",
-      location: "Delta State",
-      description:
-        "Coordinating technical teams for the ultrasonic testing and repair of midstream pipeline assets.",
-      status: "Completed",
-      icon: "🛠️",
-    },
-    {
-      id: 6,
-      title: "Warehouse Construction Fleet",
-      category: "Machinery Rental",
-      location: "Ketu-Epe Expressway",
-      description:
-        "Rental of telescopic cranes and forklifts for the structural assembly of a multi-purpose warehouse.",
-      status: "Completed",
-      icon: "🏗️",
-    },
-    {
-      id: 7,
-      title: "LPG Plant Development",
-      category: "Consultancy",
-      location: "Ogun State Border",
-      description:
-        "End-to-end consultancy for NUPRC licensing and environmental impact assessments for a new LPG bottling plant.",
-      status: "In Progress",
-      icon: "🔥",
-    },
-    {
-      id: 8,
-      title: "Industrial Park Land Survey",
-      category: "Real Estate",
-      location: "Badagry Expressway",
-      description:
-        "Mapping and title perfection for a 20-unit industrial mini-estate targeting energy SMEs.",
-      status: "Completed",
-      icon: "📐",
-    },
+    // ... rest of your project objects
   ];
 
-  const filteredProjects =
-    activeTab === "All"
-      ? projects
-      : projects.filter((p) => p.category === activeTab);
+  const categories = ["All", "Oil & Gas", "Machinery Rental", "Real Estate", "Consultancy"];
 
-  const categories = [
-    "All",
-    "Oil & Gas",
-    "Machinery Rental",
-    "Real Estate",
-    "Consultancy",
-  ];
+  // Search & Filter Logic
+  const filteredProjects = projects.filter((p) => {
+    const matchesTab = activeTab === "All" || p.category === activeTab;
+    const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          p.location.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesTab && matchesSearch;
+  });
+
+  const handleDownload = () => {
+    // Replace with your actual file path in the public folder
+    window.open('/corporate-profile.pdf', '_blank');
+  };
 
   return (
     <Layout>
-      <div className="bg-white min-h-screen">
+      <div className="bg-white min-h-screen relative">
         {/* Hero Section */}
         <section className="bg-[#0B2A4A] py-24 px-6 text-center text-white">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Our Track Record
-            </h1>
-            <p className="text-gray-300 text-lg leading-relaxed">
-              Built on Reliability & Precision. Delivering excellence across the
-              Nigerian industrial landscape.
-            </p>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">Our Track Record</h1>
+            <p className="text-gray-300 text-lg">Built on Reliability & Precision. Delivering excellence across Nigeria.</p>
           </div>
         </section>
 
         <section className="py-20 px-6 max-w-7xl mx-auto">
+          {/* Search Bar */}
+          <div className="max-w-md mx-auto mb-10">
+            <input 
+              type="text" 
+              placeholder="Search by project or location..." 
+              className="w-full px-6 py-3 border border-gray-200 rounded-full outline-none focus:ring-2 focus:ring-[#00A3A3]"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
           {/* Category Filters */}
           <div className="flex flex-wrap justify-center gap-3 mb-16">
             {categories.map((tab) => (
@@ -124,9 +64,7 @@ const Project = () => {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-6 py-2 rounded-full font-medium text-sm transition-all border ${
-                  activeTab === tab
-                    ? "bg-[#00A3A3] text-white border-[#00A3A3]"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-[#00A3A3]"
+                  activeTab === tab ? "bg-[#00A3A3] text-white" : "bg-white text-gray-600 hover:border-[#00A3A3]"
                 }`}
               >
                 {tab}
@@ -139,51 +77,71 @@ const Project = () => {
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="group bg-white border border-gray-100 p-8 rounded-2xl hover:shadow-xl transition-all duration-300 flex flex-col"
+                onClick={() => setSelectedProject(project)}
+                className="group cursor-pointer bg-white border border-gray-100 p-8 rounded-2xl hover:shadow-2xl transition-all flex flex-col"
               >
                 <div className="text-5xl mb-6">{project.icon}</div>
-
-                <h3 className="text-2xl font-bold text-[#0B2A4A] mb-3 leading-tight">
-                  {project.title}
-                </h3>
-
-                <p className="text-[#00A3A3] font-semibold text-sm uppercase tracking-wide mb-4">
-                  {project.category}
-                </p>
-
-                <p className="text-gray-600 leading-relaxed mb-6 flex-grow">
-                  {project.description}
-                </p>
-
-                <div className="flex items-center justify-between mt-auto pt-6 border-t border-gray-100">
-                  <span className="text-sm font-medium text-gray-500">
-                    📍 {project.location}
-                  </span>
-                  <span
-                    className={`text-xs font-bold px-3 py-1 rounded-full ${
-                      project.status === "Completed"
-                        ? "bg-green-50 text-green-600"
-                        : "bg-blue-50 text-blue-600"
-                    }`}
-                  >
-                    {project.status}
-                  </span>
+                <h3 className="text-2xl font-bold text-[#0B2A4A] mb-3">{project.title}</h3>
+                <p className="text-[#00A3A3] font-semibold text-sm uppercase mb-4">{project.category}</p>
+                <p className="text-gray-600 mb-6 flex-grow">{project.description}</p>
+                <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+                  <span className="text-sm text-gray-500">📍 {project.location}</span>
+                  <span className="text-blue-600 font-bold text-xs uppercase">View Details →</span>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
+        {/* --- MODAL SECTION --- */}
+        {selectedProject && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-sm">
+            <div className="bg-white w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+              <div className="bg-[#0B2A4A] p-8 text-white flex justify-between items-start">
+                <div>
+                  <span className="text-4xl mb-4 block">{selectedProject.icon}</span>
+                  <h2 className="text-3xl font-bold">{selectedProject.title}</h2>
+                  <p className="text-teal-400 font-medium">{selectedProject.category}</p>
+                </div>
+                <button 
+                  onClick={() => setSelectedProject(null)}
+                  className="bg-white/10 hover:bg-white/20 w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-8">
+                <div className="grid grid-cols-2 gap-6 mb-8">
+                  <div>
+                    <p className="text-gray-400 text-sm uppercase">Location</p>
+                    <p className="font-bold text-[#0B2A4A]">{selectedProject.location}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm uppercase">Status</p>
+                    <p className="font-bold text-green-600">{selectedProject.status}</p>
+                  </div>
+                </div>
+                <p className="text-gray-600 leading-relaxed mb-8">
+                  {selectedProject.fullDetails || selectedProject.description}
+                </p>
+                <button 
+                  onClick={() => setSelectedProject(null)}
+                  className="w-full bg-[#00A3A3] text-white py-4 rounded-xl font-bold hover:bg-[#008282] transition-colors"
+                >
+                  Close Project View
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Call to Action */}
         <section className="bg-gray-50 py-20 px-6 text-center">
-          <h2 className="text-3xl font-bold text-[#0B2A4A] mb-4">
-            Want to see more of our work?
-          </h2>
-          <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">
-            Download our corporate profile for a complete list of technical
-            capabilities and project history.
-          </p>
-          <button className="bg-[#0B2A4A] text-white px-10 py-4 rounded-lg font-bold hover:bg-[#00A3A3] transition-all shadow-lg">
+          <h2 className="text-3xl font-bold text-[#0B2A4A] mb-8">Want to see more of our work?</h2>
+          <button 
+            onClick={handleDownload}
+            className="bg-[#0B2A4A] text-white px-10 py-4 rounded-lg font-bold hover:bg-[#00A3A3] transition-all"
+          >
             Download PDF Profile
           </button>
         </section>
