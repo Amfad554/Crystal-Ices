@@ -370,7 +370,7 @@ const Home = () => {
                 Featured Projects
               </h2>
               <Link
-                to="/projects"
+                to="/project"
                 className="text-blue-600 font-bold text-sm uppercase tracking-widest border-b-2 border-blue-600 pb-1 hover:text-blue-800 hover:border-blue-800 transition-colors inline-block"
               >
                 All Projects
