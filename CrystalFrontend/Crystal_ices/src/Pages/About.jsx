@@ -52,11 +52,11 @@ const About = () => {
               global standards.
             </p>
           </div>
-          <div className="bg-gray-100 h-80 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-sm">
+          <div className="w-full h-80 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-sm bg-slate-100">
             <img
               src="https://res.cloudinary.com/debum5mhu/image/upload/v1769094466/ceo_q0gojr.jpg"
               alt="CEO"
-              className="w-full h-full object-contain bg-slate-50 hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500"
             />
           </div>
         </section>
