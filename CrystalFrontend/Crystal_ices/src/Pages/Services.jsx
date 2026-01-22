@@ -39,7 +39,7 @@ const Services = () => {
       id: 3,
       title: "Heavy Duty Machinery",
       icon: "🏗️",
-      mainImage: "https://images.unsplash.com/photo-1579412691522-8706346a0669?auto=format&fit=crop&q=80&w=1600",
+      mainImage: "https://images.unsplash.com/photo-1532323544230-7191fd51bc1b?auto=format&fit=crop&q=80&w=800",
       description: "Sales and rental solutions for industrial machinery.",
       fullContent: {
         intro: "Our fleet provides the backbone for Lagos's biggest construction and energy projects, featuring maintained plant equipment and expert operators.",
@@ -71,7 +71,7 @@ const Services = () => {
     <Layout>
       <div className="bg-white min-h-screen">
         {/* --- HERO SECTION --- */}
-        <section className="bg-slate-900 py-16 px-6 text-center">
+        <section className="bg-[#0B2A4A] py-16 px-6 text-center">
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">Our Services</h1>
           <p className="text-slate-400 max-w-xl mx-auto text-base">
             Professional energy consultancy and industrial infrastructure solutions.
