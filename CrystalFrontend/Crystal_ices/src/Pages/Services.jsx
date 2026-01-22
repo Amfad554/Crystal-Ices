@@ -228,10 +228,21 @@ const Services = () => {
                       project requirements.
                     </p>
                     <button
-                      onClick={() => {
+                      type="button" // This prevents the page from refreshing if inside a form
+                      onClick={(e) => {
+                        e.preventDefault();
                         const element =
                           document.getElementById("quotation-section");
-                        element?.scrollIntoView({ behavior: "smooth" });
+                        if (element) {
+                          element.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                          });
+                        } else {
+                          console.error(
+                            "Could not find element with id: quotation-section",
+                          );
+                        }
                       }}
                       className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-blue-700 transition-all mb-4"
                     >
