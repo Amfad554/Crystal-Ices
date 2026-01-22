@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Layout from "../Shared/Layout/Layout";
-import { HashLink as Link } from 'react-router-hash-link';
+import { HashLink as Link } from "react-router-hash-link";
 
 const Services = () => {
   const [selectedService, setSelectedService] = useState(null);
@@ -230,7 +230,7 @@ const Services = () => {
                     </p>
                     <Link
                       smooth
-                      to="#quotation-section"
+                      to="/#quotation-section" // The "/" sends them home, the "#" finds the spot
                       className="w-full block"
                     >
                       <button className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-blue-700 transition-all mb-4">

@@ -468,6 +468,7 @@ const Home = () => {
           id="quotation-section"
           className="relative py-32 px-6 overflow-hidden"
         >
+          <span id="quotation-section" className="absolute top-0 left-0 scroll-mt-24"></span>
           <div className="absolute inset-0 z-0">
             <img
               src={slide3}
