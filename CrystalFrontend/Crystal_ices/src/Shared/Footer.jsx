@@ -87,8 +87,8 @@ const Footer = () => {
                   <span className="text-lg">💬</span> Chat on WhatsApp
                 </a>
               </li>
-              <li className="break-all">✉️ crystali@crystalicesenergies.ng</li>
-              <li>📍 Ketu, Lagos, Nigeria</li>
+              <li className="break-all">✉️ crystalices10@gmail.com</li>
+              <li>📍 12 Oshokoya, Ketu, Lagos State, Nigeria</li>
               <li>⏰ Mon – Fri: 08:00 – 17:00</li>
             </ul>
           </div>
