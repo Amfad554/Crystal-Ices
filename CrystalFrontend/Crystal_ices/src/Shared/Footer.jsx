@@ -37,9 +37,9 @@ const Footer = () => {
             {/* Social Media Icons */}
             <div className="flex gap-4">
               <SocialLink href="https://www.linkedin.com/in/crystalices-energies-limited-8838a93a7?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" icon={Linkedin} label="LinkedIn" />
-              <SocialLink href="https://facebook.com/yourhandle" icon={Facebook} label="Facebook" />
-              <SocialLink href="https://twitter.com/yourhandle" icon={Twitter} label="X (Twitter)" />
-              <SocialLink href="https://instagram.com/yourhandle" icon={Instagram} label="Instagram" />
+              <SocialLink href="https://web.facebook.com/profile.php?id=61586883942940" icon={Facebook} label="Facebook" />
+              <SocialLink href="https://x.com/crystalices10" icon={Twitter} label="X (Twitter)" />
+              <SocialLink href="https://www.instagram.com/crystalices_energies/" icon={Instagram} label="Instagram" />
             </div>
           </div>
 
