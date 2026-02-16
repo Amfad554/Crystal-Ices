@@ -2,32 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
 
-// --- CENTRALIZED API CONFIG ---
 const BASE_URL = "https://crystalbackend.onrender.com";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(() =>
-    JSON.parse(localStorage.getItem("user")),
-  );
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem("user")));
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [editId, setEditId] = useState(null); // Tracks the ID of the item being edited
-  const [toast, setToast] = useState({
-    show: false,
-    message: "",
-    type: "info",
-  });
+  const [editId, setEditId] = useState(null);
+  const [toast, setToast] = useState({ show: false, message: "", type: "info" });
 
   // --- DATA STATES ---
-  const [stats, setStats] = useState({
-    PENDING: 0,
-    PROCESSING: 0,
-    COMPLETED: 0,
-    CANCELLED: 0,
-  });
+  const [stats, setStats] = useState({ PENDING: 0, PROCESSING: 0, COMPLETED: 0, CANCELLED: 0 });
   const [totals, setTotals] = useState({ equipment: 0, staff: 0 });
   const [inquiries, setInquiries] = useState([]);
   const [equipment, setEquipment] = useState([]);
@@ -47,22 +35,23 @@ const Dashboard = () => {
   // --- MODALS ---
   const [modals, setModals] = useState({ equipment: false, staff: false });
   const [forms, setForms] = useState({
-    equipment: {
-      name: "",
-      category: "Heavy Duty",
-      brand: "",
-      dailyRate: "",
-      region: "Lagos",
-    },
+    equipment: { name: "", category: "Heavy Duty", brand: "", dailyRate: "", region: "Lagos", description: "" },
     staff: { name: "", role: "", specialty: "" },
   });
 
   const showToast = (msg, type = "info") => {
     setToast({ show: true, message: msg, type });
-    setTimeout(
-      () => setToast({ show: false, message: "", type: "info" }),
-      3000,
-    );
+    setTimeout(() => setToast({ show: false, message: "", type: "info" }), 3000);
+  };
+
+  // Helper function to get auth headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    const loginTime = localStorage.getItem('loginTime');
+    return {
+      'Authorization': `Bearer ${token}`,
+      'x-login-time': loginTime || Date.now().toString()
+    };
   };
 
   const fetchData = async () => {
@@ -78,7 +67,6 @@ const Dashboard = () => {
         applications: "api/users/applications/all",
       };
 
-      // Updated to use Render BASE_URL
       const res = await fetch(`${BASE_URL}/${endpoints[activeTab]}`);
       const json = await res.json();
 
@@ -94,7 +82,7 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.log(err);
-      showToast("Sync with Database Failed", "danger");
+      showToast("Failed to sync with database", "danger");
     }
     setLoading(false);
   };
@@ -108,28 +96,21 @@ const Dashboard = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Updated to use Render BASE_URL
-      const res = await fetch(
-        `${BASE_URL}/api/users/update-profile/${user.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: profileData.name,
-            email: profileData.email,
-          }),
-        },
-      );
+      const res = await fetch(`${BASE_URL}/api/users/update-profile/${user.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: profileData.name, email: profileData.email }),
+      });
       const json = await res.json();
       if (json.success) {
         const updatedUser = { ...user, ...json.user };
         localStorage.setItem("user", JSON.stringify(updatedUser));
         setUser(updatedUser);
-        showToast("Profile Updated Successfully", "success");
+        showToast("Profile updated successfully", "success");
       }
     } catch (err) {
       console.log(err);
-      showToast("Server Connection Error", "danger");
+      showToast("Connection error", "danger");
     } finally {
       setLoading(false);
     }
@@ -137,26 +118,23 @@ const Dashboard = () => {
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      // Updated to use Render BASE_URL
       const res = await fetch(`${BASE_URL}/api/inquiry/status/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
-        showToast("Status Updated");
+        showToast("Status updated");
         fetchData();
       }
     } catch (err) {
       console.log(err);
-
       showToast("Update failed", "danger");
     }
   };
+
   const handleAction = async (type, method, body = null, id = "") => {
     setLoading(true);
-
-    // 1. Correct URL logic
     let endpoint = method === "PUT" ? `update/${id}` : "add";
     if (method === "DELETE") endpoint = `delete/${id}`;
     const url = `${BASE_URL}/api/admin/${type}/${endpoint}`;
@@ -165,46 +143,48 @@ const Dashboard = () => {
       const formData = new FormData();
 
       if (method !== "DELETE") {
-        // 2. Data Cleaning - This prevents 500 errors
         Object.keys(body).forEach((key) => {
           let value = body[key];
-
-          // Convert dailyRate to a real number
-          if (key === "dailyRate" && value) {
-            value = parseFloat(value);
-          }
-
-          // Only append if there is a value
+          if (key === "dailyRate" && value) value = parseFloat(value);
           if (value !== null && value !== undefined && value !== "") {
             formData.append(key, value);
           }
         });
-
-        // 3. Image Append
-        if (selectedFile) {
-          formData.append("image", selectedFile);
-        }
+        if (selectedFile) formData.append("image", selectedFile);
       }
+
+      // Get auth headers
+      const headers = getAuthHeaders();
 
       const res = await fetch(url, {
         method: method,
+        headers: headers,
         body: method === "DELETE" ? null : formData,
-        // NOTE: Do NOT set Content-Type header here for FormData
       });
 
       const json = await res.json();
 
+      // Handle session expiration
+      if (!res.ok && (json.sessionExpired || res.status === 401)) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('loginTime');
+        window.dispatchEvent(new Event('auth-state-change'));
+        alert('Your session has expired. Please login again.');
+        navigate('/auth');
+        return;
+      }
+
       if (json.success) {
         showToast(`${type} updated successfully!`, "success");
-        closeModal(); // This uses the new close function
-        fetchData(); // Refresh your table
+        closeModal();
+        fetchData();
       } else {
-        // This will show you the ACTUAL error from the server
-        showToast(json.message || "Database rejected request", "danger");
+        showToast(json.message || "Operation failed", "danger");
       }
     } catch (err) {
       console.error("Save Error:", err);
-      showToast("Server Error: Check your connection", "danger");
+      showToast("Server error", "danger");
     } finally {
       setLoading(false);
     }
@@ -213,74 +193,61 @@ const Dashboard = () => {
   const startEdit = (item) => {
     setEditId(item.id);
     const targetKey = activeTab === "inventory" ? "equipment" : "staff";
-
-    // Pre-fill the form state with existing data
-    setForms({
-      ...forms,
-      [targetKey]: { ...item },
-    });
-
-    // Open the correct modal
+    setForms({ ...forms, [targetKey]: { ...item } });
     setModals({ ...modals, [targetKey]: true });
   };
+
   const closeModal = () => {
     setModals({ equipment: false, staff: false });
     setEditId(null);
     setSelectedFile(null);
-    // This clears the inputs so they aren't full next time you open the modal
     setForms({
-      equipment: {
-        name: "",
-        category: "Heavy Duty",
-        brand: "",
-        dailyRate: "",
-        region: "Lagos",
-        description: "",
-      },
+      equipment: { name: "", category: "Heavy Duty", brand: "", dailyRate: "", region: "Lagos", description: "" },
       staff: { name: "", role: "", specialty: "" },
     });
   };
+
   const menuItems = [
     {
       id: "overview",
       label: "Dashboard",
-      icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+      icon: "📊",
       roles: ["ADMIN"],
     },
     {
       id: "inquiries",
       label: user?.role === "CLIENT" ? "My Requests" : "Inquiries",
-      icon: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z",
+      icon: "💬",
       roles: ["ADMIN", "STAFF", "CLIENT"],
     },
     {
       id: "inventory",
       label: "Equipment",
-      icon: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4",
+      icon: "🚜",
       roles: ["ADMIN", "STAFF"],
     },
     {
       id: "staff",
       label: "Personnel",
-      icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z",
+      icon: "👥",
       roles: ["ADMIN"],
     },
     {
       id: "applications",
-      label: "Job Apps",
-      icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+      label: "Job Applications",
+      icon: "📄",
       roles: ["ADMIN"],
     },
     {
       id: "subscribers",
       label: "Subscribers",
-      icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+      icon: "📧",
       roles: ["ADMIN", "STAFF"],
     },
     {
       id: "profile",
       label: "My Profile",
-      icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
+      icon: "👤",
       roles: ["ADMIN", "STAFF", "CLIENT"],
     },
   ];
@@ -289,406 +256,347 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="flex h-screen bg-[#F1F5F9] font-sans relative overflow-hidden">
+      <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 font-['Inter'] relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, #0B2A4A 1px, transparent 1px)`,
+            backgroundSize: '32px 32px'
+          }}></div>
+        </div>
+
+        {/* Mobile Overlay */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
 
+        {/* Sidebar */}
         <aside
-          className={`fixed lg:static inset-y-0 left-0 z-50 w-72 bg-[#0F172A] text-slate-300 flex flex-col p-6 shadow-2xl transition-transform duration-300 ${
-            isSidebarOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
-          }`}
+          className={`fixed lg:static inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-[#0B2A4A] to-[#051526] text-white flex flex-col shadow-2xl transition-transform duration-300 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            }`}
         >
-          <div className="flex items-center justify-between mb-10 px-2">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-                C
+          {/* Logo Section */}
+          <div className="p-6 border-b border-white/10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#00A3A3] to-[#00C9C9] rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[#00A3A3]/20">
+                  C
+                </div>
+                <div>
+                  <h1 className="font-black text-lg tracking-tight">Crystal</h1>
+                  <p className="text-xs text-white/60">Industrial Portal</p>
+                </div>
               </div>
-              <span className="text-white font-bold text-xl tracking-tight">
-                Crystal
-              </span>
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="lg:hidden text-white/60 hover:text-white"
+              >
+                ✕
+              </button>
             </div>
-            <button
-              onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden text-slate-400"
-            >
-              ✕
-            </button>
           </div>
 
-          <nav className="flex-1 space-y-1">
-            {menuItems
-              .filter((item) => item.roles.includes(user.role))
-              .map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setIsSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm font-medium transition-all ${
-                    activeTab === item.id
-                      ? "bg-blue-600 text-white shadow-lg"
-                      : "hover:bg-slate-800"
-                  }`}
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
+          {/* User Info Card */}
+          <div className="px-6 pt-6 pb-4">
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00A3A3] to-[#00C9C9] flex items-center justify-center font-black text-xl shadow-lg">
+                  {user.name.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-sm truncate">{user.name}</h3>
+                  <p className="text-xs text-white/60">{user.role}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-4 py-2 overflow-y-auto">
+            <div className="space-y-1">
+              {menuItems
+                .filter((item) => item.roles.includes(user.role))
+                .map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setIsSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${activeTab === item.id
+                        ? "bg-gradient-to-r from-[#00A3A3] to-[#00C9C9] text-white shadow-lg shadow-[#00A3A3]/20"
+                        : "text-white/70 hover:bg-white/5 hover:text-white"
+                      }`}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d={item.icon}
-                    />
-                  </svg>
-                  {item.label}
-                </button>
-              ))}
+                    <span className="text-xl">{item.icon}</span>
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+            </div>
           </nav>
 
-          <button
-            onClick={() => {
-              localStorage.clear();
-              navigate("/auth");
-            }}
-            className="p-3 text-sm text-slate-500 hover:text-red-400 flex items-center gap-3 border-t border-slate-800 mt-4"
-          >
-            Logout Account
-          </button>
+          {/* Logout */}
+          <div className="p-4 border-t border-white/10">
+            <button
+              onClick={() => {
+                localStorage.clear();
+                navigate("/auth");
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/60 hover:text-red-400 hover:bg-white/5 rounded-xl transition-all"
+            >
+              <span className="text-xl">🚪</span>
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
         </aside>
 
-        <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <header className="h-16 bg-white border-b border-slate-200 px-4 lg:px-8 flex items-center justify-between shadow-sm shrink-0">
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
+          {/* Top Bar */}
+          <header className="h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-6 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsSidebarOpen(true)}
-                className="lg:hidden p-2 text-slate-600"
+                className="lg:hidden p-2 hover:bg-slate-100 rounded-xl transition-colors"
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
+                <svg className="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              <h2 className="text-slate-800 font-bold uppercase tracking-wider text-xs lg:text-sm truncate">
-                {activeTab} Control
-              </h2>
+              <div>
+                <h2 className="text-2xl font-black text-[#0B2A4A] tracking-tight capitalize">
+                  {activeTab === "inventory" ? "Equipment" : activeTab}
+                </h2>
+                <p className="text-xs text-slate-500 font-medium">
+                  {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
             </div>
+
             <div className="flex items-center gap-3">
-              <span className="hidden sm:inline text-[10px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                {user.role}
-              </span>
-              <div
-                onClick={() => setActiveTab("profile")}
-                className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs cursor-pointer hover:ring-2 ring-blue-400"
-              >
-                {user.name.charAt(0)}
+              <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#00A3A3] to-[#00C9C9] rounded-full">
+                <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                <span className="text-xs font-bold text-white uppercase tracking-wider">{user.role}</span>
               </div>
             </div>
           </header>
 
-          <div className="p-4 lg:p-8 overflow-y-auto flex-1">
+          {/* Content Area */}
+          <div className="flex-1 overflow-y-auto p-6">
             {/* PROFILE TAB */}
             {activeTab === "profile" && (
-              <div className="max-w-2xl mx-auto space-y-6">
-                <div className="bg-white rounded-3xl p-6 lg:p-10 shadow-sm border border-slate-100">
-                  <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
-                    <div className="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center text-4xl text-white font-black shadow-xl">
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-200/50">
+                  <div className="flex flex-col md:flex-row items-center gap-8 mb-8 pb-8 border-b border-slate-100">
+                    <div className="w-32 h-32 bg-gradient-to-br from-[#00A3A3] to-[#00C9C9] rounded-3xl flex items-center justify-center text-5xl text-white font-black shadow-2xl shadow-[#00A3A3]/20">
                       {user.name.charAt(0)}
                     </div>
-                    <div className="text-center sm:text-left">
-                      <h3 className="text-2xl font-black text-slate-800">
-                        {user.name}
-                      </h3>
-                      <p className="text-slate-400 text-sm">
-                        {user.role} Member
-                      </p>
+                    <div className="text-center md:text-left">
+                      <h3 className="text-3xl font-black text-[#0B2A4A] mb-2">{user.name}</h3>
+                      <p className="text-slate-500 font-medium">{user.role} • {user.email}</p>
+                      <div className="mt-4 flex gap-2 justify-center md:justify-start">
+                        <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">Active</span>
+                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Verified</span>
+                      </div>
                     </div>
                   </div>
-                  <form onSubmit={handleUpdateProfile} className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">
+
+                  <form onSubmit={handleUpdateProfile} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
                           Full Name
                         </label>
                         <input
                           type="text"
                           value={profileData.name}
-                          onChange={(e) =>
-                            setProfileData({
-                              ...profileData,
-                              name: e.target.value,
-                            })
-                          }
-                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 transition-all"
+                          onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#00A3A3] focus:ring-4 focus:ring-[#00A3A3]/10 transition-all"
                         />
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
                           Email Address
                         </label>
                         <input
                           type="email"
                           value={profileData.email}
                           disabled
-                          className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-400 cursor-not-allowed"
+                          className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-400 cursor-not-allowed"
                         />
                       </div>
                     </div>
+
                     <button
                       type="submit"
-                      className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition-all"
+                      disabled={loading}
+                      className="w-full bg-gradient-to-r from-[#00A3A3] to-[#00C9C9] text-white py-4 rounded-xl font-bold shadow-lg shadow-[#00A3A3]/20 hover:shadow-xl hover:shadow-[#00A3A3]/30 transition-all disabled:opacity-50"
                     >
-                      {loading ? "Updating..." : "Update Profile Settings"}
+                      {loading ? "Updating..." : "Save Changes"}
                     </button>
                   </form>
                 </div>
               </div>
             )}
 
-            {/* OVERVIEW TAB */}
-            {activeTab === "overview" && (
-              <div className="space-y-6 lg:space-y-8">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
-                  {Object.entries(stats).map(([k, v]) => (
+            {/* OVERVIEW TAB - ADMIN ONLY */}
+            {activeTab === "overview" && user.role === "ADMIN" && (
+              <div className="space-y-6">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {Object.entries(stats).map(([key, value]) => (
                     <div
-                      key={k}
-                      className="bg-white p-4 lg:p-6 rounded-2xl shadow-sm border border-slate-100"
+                      key={key}
+                      className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200/50 hover:shadow-xl transition-all"
                     >
-                      <p className="text-[10px] uppercase font-bold text-slate-400 mb-1 truncate">
-                        {k}
-                      </p>
-                      <span className="text-xl lg:text-3xl font-black text-slate-800">
-                        {v}
-                      </span>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{key}</p>
+                      <p className="text-4xl font-black text-[#0B2A4A]">{value}</p>
                     </div>
                   ))}
                 </div>
+
+                {/* Large Cards */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 lg:p-8 rounded-[2rem] text-white shadow-xl">
-                    <p className="text-xs font-bold opacity-70 uppercase mb-1">
-                      Fleet Assets
-                    </p>
-                    <h1 className="text-4xl lg:text-5xl font-black">
-                      {totals.equipment}
-                    </h1>
+                  <div className="bg-gradient-to-br from-[#00A3A3] to-[#00C9C9] rounded-3xl p-8 text-white shadow-2xl shadow-[#00A3A3]/20">
+                    <p className="text-sm font-bold opacity-80 uppercase tracking-wider mb-2">Fleet Assets</p>
+                    <p className="text-6xl font-black mb-4">{totals.equipment}</p>
+                    <p className="text-sm opacity-80">Total equipment in inventory</p>
                   </div>
-                  <div className="bg-slate-900 p-6 lg:p-8 rounded-[2rem] text-white shadow-xl">
-                    <p className="text-xs font-bold opacity-50 uppercase mb-1">
-                      Field Staff
-                    </p>
-                    <h1 className="text-4xl lg:text-5xl font-black">
-                      {totals.staff}
-                    </h1>
+                  <div className="bg-gradient-to-br from-[#0B2A4A] to-[#051526] rounded-3xl p-8 text-white shadow-2xl">
+                    <p className="text-sm font-bold opacity-80 uppercase tracking-wider mb-2">Personnel</p>
+                    <p className="text-6xl font-black mb-4">{totals.staff}</p>
+                    <p className="text-sm opacity-80">Active staff members</p>
                   </div>
                 </div>
               </div>
             )}
 
             {/* DATA TABLES */}
-            {[
-              "inquiries",
-              "inventory",
-              "staff",
-              "subscribers",
-              "applications",
-            ].includes(activeTab) && (
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="p-4 lg:p-6 border-b border-slate-100 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50/50">
-                  <h3 className="text-xl font-black text-slate-800 mb-6 uppercase tracking-tight">
-                    {editId
-                      ? `Edit ${activeTab === "inventory" ? "Equipment" : "Personnel"}`
-                      : `Add New ${activeTab === "inventory" ? "Equipment" : "Personnel"}`}
+            {["inquiries", "inventory", "staff", "subscribers", "applications"].includes(activeTab) && (
+              <div className="bg-white rounded-3xl shadow-xl border border-slate-200/50 overflow-hidden">
+                <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                  <h3 className="text-2xl font-black text-[#0B2A4A]">
+                    {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
                   </h3>
                   <div className="flex w-full sm:w-auto gap-2">
                     <input
                       type="text"
                       placeholder="Search..."
-                      className="flex-1 px-4 py-2 border rounded-lg text-sm outline-none sm:w-64 focus:border-blue-500"
+                      className="flex-1 sm:w-64 px-4 py-2 border border-slate-200 rounded-xl outline-none focus:border-[#00A3A3] focus:ring-4 focus:ring-[#00A3A3]/10 transition-all"
                       onChange={(e) => setSearch(e.target.value)}
                     />
                     {["inventory", "staff"].includes(activeTab) && (
                       <button
                         onClick={() => {
-                          setEditId(null); // Clear the ID so it's a "New" entry
-                          setSelectedFile(null); // Clear previous file
+                          setEditId(null);
+                          setSelectedFile(null);
                           setForms({
-                            equipment: {
-                              name: "",
-                              category: "Heavy Duty",
-                              brand: "",
-                              dailyRate: "",
-                              region: "Lagos",
-                              description: "",
-                            },
+                            equipment: { name: "", category: "Heavy Duty", brand: "", dailyRate: "", region: "Lagos", description: "" },
                             staff: { name: "", role: "", specialty: "" },
                           });
-                          setModals({
-                            ...modals,
-                            [activeTab === "inventory" ? "equipment" : "staff"]:
-                              true,
-                          });
+                          setModals({ ...modals, [activeTab === "inventory" ? "equipment" : "staff"]: true });
                         }}
-                        className="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase"
+                        className="bg-gradient-to-r from-[#00A3A3] to-[#00C9C9] text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg hover:shadow-xl transition-all whitespace-nowrap"
                       >
                         + Add New
                       </button>
                     )}
                   </div>
                 </div>
+
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left min-w-[600px]">
-                    <thead className="bg-slate-50 text-[10px] uppercase text-slate-400 font-bold border-b">
+                  <table className="w-full">
+                    <thead className="bg-slate-50 border-b border-slate-200">
                       <tr>
-                        <th className="px-6 py-4">
-                          {activeTab === "subscribers"
-                            ? "Email Address"
-                            : activeTab === "applications"
-                              ? "Applicant"
-                              : "Name / Primary"}
+                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                          {activeTab === "subscribers" ? "Email" : activeTab === "applications" ? "Applicant" : "Name"}
                         </th>
-                        <th className="px-6 py-4">
-                          {activeTab === "subscribers"
-                            ? "Joined"
-                            : activeTab === "applications"
-                              ? "Role / CV"
-                              : "Category/Role"}
+                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                          {activeTab === "subscribers" ? "Date" : activeTab === "applications" ? "Role" : "Details"}
                         </th>
-                        <th className="px-6 py-4 text-right">Actions</th>
+                        <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {(activeTab === "inventory"
-                        ? equipment
-                        : activeTab === "staff"
-                          ? staff
-                          : activeTab === "subscribers"
-                            ? subscribers
-                            : activeTab === "applications"
-                              ? applications
-                              : inquiries
-                      )
+                      {(activeTab === "inventory" ? equipment :
+                        activeTab === "staff" ? staff :
+                          activeTab === "subscribers" ? subscribers :
+                            activeTab === "applications" ? applications : inquiries)
                         .filter((item) =>
-                          (
-                            item.name ||
-                            item.fullName ||
-                            item.email ||
-                            item.applicantName ||
-                            ""
-                          )
+                          (item.name || item.fullName || item.email || item.applicantName || "")
                             .toLowerCase()
-                            .includes(search.toLowerCase()),
+                            .includes(search.toLowerCase())
                         )
                         .map((item) => (
-                          <tr
-                            key={item.id}
-                            className="hover:bg-slate-50/30 transition-colors"
-                          >
+                          <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                             <td className="px-6 py-4">
-                              <div className="font-bold text-slate-800 text-sm">
-                                {activeTab === "applications"
-                                  ? item.applicantName
-                                  : activeTab === "subscribers"
-                                    ? item.email
-                                    : item.name || item.fullName}
-                              </div>
-                              <div className="text-xs text-slate-400 truncate max-w-[150px]">
-                                {activeTab === "applications"
-                                  ? item.applicantEmail
-                                  : item.brand || item.email || item.specialty}
+                              <div className="flex items-center gap-3">
+                                {item.imageUrl && (
+                                  <img
+                                    src={item.imageUrl}
+                                    alt=""
+                                    className="w-12 h-12 rounded-xl object-cover border-2 border-slate-200"
+                                  />
+                                )}
+                                <div>
+                                  <div className="font-bold text-slate-900">
+                                    {activeTab === "applications" ? item.applicantName :
+                                      activeTab === "subscribers" ? item.email :
+                                        item.name || item.fullName}
+                                  </div>
+                                  <div className="text-sm text-slate-500">
+                                    {activeTab === "applications" ? item.applicantEmail :
+                                      item.brand || item.email || item.specialty}
+                                  </div>
+                                </div>
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                {/* Display the image if it exists, otherwise show a placeholder */}
-                                <img
-                                  src={
-                                    item.imageUrl ||
-                                    "https://via.placeholder.com/40"
-                                  }
-                                  alt=""
-                                  className="w-10 h-10 rounded-full object-cover border border-slate-200"
-                                />
-                                <div>
-                                  <div className="font-bold text-slate-800 text-sm">
-                                    {item.name || item.fullName}
-                                  </div>
-                                  <div className="text-xs text-slate-400">
-                                    {item.brand || item.specialty}
-                                  </div>
-                                </div>
+                              <div className="text-sm text-slate-600">
+                                {item.category || item.role || item.roleApplied || new Date(item.createdAt).toLocaleDateString()}
                               </div>
                             </td>
                             <td className="px-6 py-4 text-right">
                               {activeTab === "inquiries" ? (
                                 <select
                                   value={item.status}
-                                  onChange={(e) =>
-                                    handleStatusUpdate(item.id, e.target.value)
-                                  }
-                                  className="text-[10px] font-bold px-2 py-1 rounded border bg-white outline-none focus:ring-2 focus:ring-blue-500"
+                                  onChange={(e) => handleStatusUpdate(item.id, e.target.value)}
+                                  className="text-xs font-bold px-3 py-2 rounded-lg border-2 border-slate-200 bg-white outline-none focus:border-[#00A3A3] transition-all"
                                 >
                                   <option value="PENDING">PENDING</option>
                                   <option value="PROCESSING">PROCESSING</option>
                                   <option value="COMPLETED">COMPLETED</option>
                                 </select>
-                              ) : activeTab === "applications" ? (
-                                <button
-                                  onClick={() =>
-                                    showToast("Application Accepted", "success")
-                                  }
-                                  className="bg-green-600 text-white px-3 py-1 rounded text-[10px] font-bold hover:bg-green-700 transition-colors"
-                                >
-                                  ACCEPT
-                                </button>
                               ) : activeTab === "subscribers" ? (
-                                <span className="text-[10px] text-slate-400 italic font-medium uppercase tracking-widest">
-                                  System Record
-                                </span>
+                                <span className="text-xs text-slate-400 font-medium uppercase">System Record</span>
                               ) : (
-                                /* This section handles Staff and Inventory */
-                                <div className="flex justify-end items-center gap-4">
-                                  {/* NEW EDIT BUTTON */}
-                                  <button
-                                    onClick={() => startEdit(item)}
-                                    className="text-blue-600 font-bold text-[10px] hover:text-blue-800 transition-colors uppercase tracking-wider"
-                                  >
-                                    Edit
-                                  </button>
-
-                                  {/* EXISTING REMOVE BUTTON */}
-                                  <button
-                                    onClick={() =>
-                                      handleAction(
-                                        activeTab === "inventory"
-                                          ? "equipment"
-                                          : "staff",
-                                        "DELETE",
-                                        null,
-                                        item.id,
-                                      )
-                                    }
-                                    className="text-red-500 font-black text-[10px] hover:text-red-700 transition-colors uppercase tracking-wider"
-                                  >
-                                    Remove
-                                  </button>
+                                <div className="flex justify-end items-center gap-3">
+                                  {["inventory", "staff"].includes(activeTab) && (
+                                    <>
+                                      <button
+                                        onClick={() => startEdit(item)}
+                                        className="text-[#00A3A3] font-bold text-xs hover:text-[#00C9C9] transition-colors uppercase"
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
+                                        onClick={() => handleAction(
+                                          activeTab === "inventory" ? "equipment" : "staff",
+                                          "DELETE",
+                                          null,
+                                          item.id
+                                        )}
+                                        className="text-red-500 font-bold text-xs hover:text-red-700 transition-colors uppercase"
+                                      >
+                                        Delete
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               )}
                             </td>
@@ -702,111 +610,144 @@ const Dashboard = () => {
           </div>
         </main>
 
+        {/* Toast Notifications */}
         {toast.show && (
           <div
-            className={`fixed bottom-8 right-4 lg:right-8 px-6 py-4 rounded-xl shadow-2xl border text-white font-bold text-xs uppercase z-[100] transition-all ${
-              toast.type === "danger"
-                ? "bg-red-600 border-red-500"
-                : "bg-slate-900 border-slate-700"
-            }`}
+            className={`fixed bottom-8 right-8 px-6 py-4 rounded-2xl shadow-2xl text-white font-bold text-sm uppercase z-[100] animate-slide-up ${toast.type === "danger" ? "bg-gradient-to-r from-red-500 to-red-600" :
+                toast.type === "success" ? "bg-gradient-to-r from-emerald-500 to-emerald-600" :
+                  "bg-gradient-to-r from-[#0B2A4A] to-[#051526]"
+              }`}
           >
             {toast.message}
           </div>
         )}
       </div>
-      {/* --- DYNAMIC MODAL LAYER --- */}
-      {(modals.equipment || modals.staff) && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl">
-            <h2 className="text-xl font-black mb-6 uppercase tracking-tight">
-              {editId ? "Update" : "Add New"}{" "}
-              {modals.equipment ? "Equipment" : "Staff"}
+
+      {/* EQUIPMENT MODAL */}
+      {modals.equipment && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-3xl font-black mb-6 text-[#0B2A4A]">
+              {editId ? "Update" : "Add"} Equipment
             </h2>
 
             <div className="space-y-4">
-              {modals.equipment ? (
-                <>
-                  <input
-                    className="w-full p-3 bg-slate-50 border rounded-xl"
-                    placeholder="Equipment Name"
-                    value={forms.equipment.name}
-                    onChange={(e) =>
-                      setForms({
-                        ...forms,
-                        equipment: { ...forms.equipment, name: e.target.value },
-                      })
-                    }
-                  />
-                  <input
-                    className="w-full p-3 bg-slate-50 border rounded-xl"
-                    placeholder="Brand"
-                    value={forms.equipment.brand}
-                    onChange={(e) =>
-                      setForms({
-                        ...forms,
-                        equipment: {
-                          ...forms.equipment,
-                          brand: e.target.value,
-                        },
-                      })
-                    }
-                  />
-                </>
-              ) : (
-                <>
-                  <input
-                    className="w-full p-3 bg-slate-50 border rounded-xl"
-                    placeholder="Staff Name"
-                    value={forms.staff.name}
-                    onChange={(e) =>
-                      setForms({
-                        ...forms,
-                        staff: { ...forms.staff, name: e.target.value },
-                      })
-                    }
-                  />
-                  <input
-                    className="w-full p-3 bg-slate-50 border rounded-xl"
-                    placeholder="Role"
-                    value={forms.staff.role}
-                    onChange={(e) =>
-                      setForms({
-                        ...forms,
-                        staff: { ...forms.staff, role: e.target.value },
-                      })
-                    }
-                  />
-                </>
-              )}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                  Equipment Name *
+                </label>
+                <input
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#00A3A3] focus:ring-4 focus:ring-[#00A3A3]/10 transition-all"
+                  placeholder="e.g., Caterpillar 320D Excavator"
+                  value={forms.equipment.name}
+                  onChange={(e) => setForms({ ...forms, equipment: { ...forms.equipment, name: e.target.value } })}
+                  required
+                />
+              </div>
 
-              <div className="p-4 border-2 border-dashed rounded-xl">
-                <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">
-                  Upload Photo
-                </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                    Category *
+                  </label>
+                  <select
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#00A3A3] focus:ring-4 focus:ring-[#00A3A3]/10 transition-all"
+                    value={forms.equipment.category}
+                    onChange={(e) => setForms({ ...forms, equipment: { ...forms.equipment, category: e.target.value } })}
+                  >
+                    <option value="Heavy Duty">Heavy Duty</option>
+                    <option value="Oil & Gas">Oil & Gas</option>
+                    <option value="Energy">Energy</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                    Brand
+                  </label>
+                  <input
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#00A3A3] focus:ring-4 focus:ring-[#00A3A3]/10 transition-all"
+                    placeholder="Caterpillar"
+                    value={forms.equipment.brand}
+                    onChange={(e) => setForms({ ...forms, equipment: { ...forms.equipment, brand: e.target.value } })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                    Region
+                  </label>
+                  <input
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#00A3A3] focus:ring-4 focus:ring-[#00A3A3]/10 transition-all"
+                    placeholder="Lagos"
+                    value={forms.equipment.region}
+                    onChange={(e) => setForms({ ...forms, equipment: { ...forms.equipment, region: e.target.value } })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                    Daily Rate (₦)
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#00A3A3] focus:ring-4 focus:ring-[#00A3A3]/10 transition-all"
+                    placeholder="150000"
+                    value={forms.equipment.dailyRate}
+                    onChange={(e) => setForms({ ...forms, equipment: { ...forms.equipment, dailyRate: e.target.value } })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                  Description
+                </label>
+                <textarea
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#00A3A3] focus:ring-4 focus:ring-[#00A3A3]/10 transition-all resize-none"
+                  placeholder="Equipment specifications..."
+                  rows="3"
+                  value={forms.equipment.description || ""}
+                  onChange={(e) => setForms({ ...forms, equipment: { ...forms.equipment, description: e.target.value } })}
+                />
+              </div>
+
+              <div className="p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50">
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">
+                  Equipment Photo
+                </label>
+                {editId && forms.equipment.imageUrl && !selectedFile && (
+                  <div className="mb-4">
+                    <img src={forms.equipment.imageUrl} alt="Current" className="h-40 w-full object-cover rounded-xl" />
+                    <p className="text-xs text-slate-400 mt-2">Current image</p>
+                  </div>
+                )}
+                {selectedFile && (
+                  <div className="mb-4">
+                    <img src={URL.createObjectURL(selectedFile)} alt="Preview" className="h-40 w-full object-cover rounded-xl" />
+                    <p className="text-xs text-slate-400 mt-2">New image preview</p>
+                  </div>
+                )}
                 <input
                   type="file"
+                  accept="image/*"
                   onChange={(e) => setSelectedFile(e.target.files[0])}
-                  className="text-xs"
+                  className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold file:bg-gradient-to-r file:from-[#00A3A3] file:to-[#00C9C9] file:text-white hover:file:shadow-lg cursor-pointer"
                 />
               </div>
 
               <div className="flex gap-3 pt-4">
                 <button
-                  onClick={() =>
-                    handleAction(
-                      modals.equipment ? "equipment" : "staff",
-                      editId ? "PUT" : "POST",
-                      modals.equipment ? forms.equipment : forms.staff,
-                      editId,
-                    )
-                  }
-                  className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs shadow-lg"
+                  onClick={() => handleAction("equipment", editId ? "PUT" : "POST", forms.equipment, editId)}
+                  disabled={loading}
+                  className="flex-1 bg-gradient-to-r from-[#00A3A3] to-[#00C9C9] text-white py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
                 >
-                  {loading ? "Saving..." : "Save Record"}
+                  {loading ? "Saving..." : editId ? "Update" : "Add Equipment"}
                 </button>
                 <button
                   onClick={closeModal}
-                  className="flex-1 py-3 font-bold text-slate-400 uppercase text-xs"
+                  disabled={loading}
+                  className="flex-1 py-4 font-bold text-slate-600 border-2 border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
                 >
                   Cancel
                 </button>
@@ -815,6 +756,98 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+      {/* STAFF MODAL */}
+      {modals.staff && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-2xl shadow-2xl">
+            <h2 className="text-3xl font-black mb-6 text-[#0B2A4A]">
+              {editId ? "Update" : "Add"} Staff Member
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                  Staff Name *
+                </label>
+                <input
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#00A3A3] focus:ring-4 focus:ring-[#00A3A3]/10 transition-all"
+                  placeholder="John Doe"
+                  value={forms.staff.name}
+                  onChange={(e) => setForms({ ...forms, staff: { ...forms.staff, name: e.target.value } })}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                  Role
+                </label>
+                <input
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#00A3A3] focus:ring-4 focus:ring-[#00A3A3]/10 transition-all"
+                  placeholder="Engineer"
+                  value={forms.staff.role}
+                  onChange={(e) => setForms({ ...forms, staff: { ...forms.staff, role: e.target.value } })}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                  Specialty
+                </label>
+                <input
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#00A3A3] focus:ring-4 focus:ring-[#00A3A3]/10 transition-all"
+                  placeholder="Mechanical"
+                  value={forms.staff.specialty}
+                  onChange={(e) => setForms({ ...forms, staff: { ...forms.staff, specialty: e.target.value } })}
+                />
+              </div>
+
+              <div className="p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50">
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">
+                  Staff Photo
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setSelectedFile(e.target.files[0])}
+                  className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold file:bg-gradient-to-r file:from-[#00A3A3] file:to-[#00C9C9] file:text-white hover:file:shadow-lg cursor-pointer"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => handleAction("staff", editId ? "PUT" : "POST", forms.staff, editId)}
+                  disabled={loading}
+                  className="flex-1 bg-gradient-to-r from-[#00A3A3] to-[#00C9C9] text-white py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                >
+                  {loading ? "Saving..." : editId ? "Update" : "Add Staff"}
+                </button>
+                <button
+                  onClick={closeModal}
+                  disabled={loading}
+                  className="flex-1 py-4 font-bold text-slate-600 border-2 border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slide-up {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out;
+        }
+      `}</style>
     </Layout>
   );
 };

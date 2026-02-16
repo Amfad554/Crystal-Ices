@@ -67,9 +67,14 @@ const Auth = () => {
 
       if (response.ok && result.success) {
         if (view === "login") {
+          // Store authentication data
           localStorage.setItem("token", result.token);
           localStorage.setItem("user", JSON.stringify(result.user));
+          
+          // ** ADDED: Store login timestamp for session timeout **
+          localStorage.setItem("loginTime", result.loginTime.toString());
 
+          // Trigger auth state change event
           window.dispatchEvent(new Event("auth-state-change")); 
 
           navigate("/dashboard");

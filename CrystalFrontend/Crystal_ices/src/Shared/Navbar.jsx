@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   CiMenuFries,
@@ -14,30 +14,87 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const checkUserAuth = useCallback(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
+  // Session timeout duration (30 minutes in milliseconds)
+  const SESSION_TIMEOUT = 30 * 60 * 1000; // Change this value as needed
+  const timeoutRef = useRef(null);
 
-  useEffect(() => {
-    checkUserAuth();
-    window.addEventListener("auth-state-change", checkUserAuth);
-    window.addEventListener("storage", checkUserAuth);
-
-    return () => {
-      window.removeEventListener("auth-state-change", checkUserAuth);
-      window.removeEventListener("storage", checkUserAuth);
-    };
-  }, [checkUserAuth, location]);
-
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user"); // Clean up user data too
+    localStorage.removeItem("user");
+    localStorage.removeItem("loginTime");
     setIsLoggedIn(false);
     setIsOpen(false);
     window.dispatchEvent(new Event("auth-state-change"));
     navigate("/");
-  };
+  }, [navigate]);
+
+  const checkUserAuth = useCallback(() => {
+    const token = localStorage.getItem("token");
+    const loginTime = localStorage.getItem("loginTime");
+    
+    // Check if session has expired
+    if (token && loginTime) {
+      const elapsed = Date.now() - parseInt(loginTime);
+      if (elapsed > SESSION_TIMEOUT) {
+        // Session expired, log out
+        handleLogout();
+        return;
+      }
+    }
+    
+    setIsLoggedIn(!!token);
+  }, [SESSION_TIMEOUT, handleLogout]);
+
+  const resetTimeout = useCallback(() => {
+    // Clear existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    // Only set timeout if user is logged in
+    const token = localStorage.getItem("token");
+    if (token) {
+      // Update last activity time
+      localStorage.setItem("loginTime", Date.now().toString());
+      
+      // Set new timeout
+      timeoutRef.current = setTimeout(() => {
+        handleLogout();
+        alert("Your session has expired. Please log in again.");
+      }, SESSION_TIMEOUT);
+    }
+  }, [SESSION_TIMEOUT, handleLogout]);
+
+  useEffect(() => {
+    checkUserAuth();
+    
+    // Set up event listeners
+    window.addEventListener("auth-state-change", checkUserAuth);
+    window.addEventListener("storage", checkUserAuth);
+
+    // Activity events to reset timeout
+    const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+    
+    activityEvents.forEach(event => {
+      window.addEventListener(event, resetTimeout);
+    });
+
+    // Initial timeout setup
+    resetTimeout();
+
+    return () => {
+      window.removeEventListener("auth-state-change", checkUserAuth);
+      window.removeEventListener("storage", checkUserAuth);
+      
+      activityEvents.forEach(event => {
+        window.removeEventListener(event, resetTimeout);
+      });
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [checkUserAuth, resetTimeout, location]);
 
   const navlinks = [
     { id: 1, name: "Home", path: "/" },
