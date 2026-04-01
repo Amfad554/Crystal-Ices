@@ -117,7 +117,7 @@ const Dashboard = () => {
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      const res = await fetch(`${BASE_URL}/api/inquiry/status/${id}`, {
+      const res = await fetch(`${BASE_URL}/api/inquiry/update-status/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ status: newStatus }),
@@ -133,36 +133,71 @@ const Dashboard = () => {
     let endpoint = method === "PUT" ? `update/${id}` : "add";
     if (method === "DELETE") endpoint = `delete/${id}`;
     const url = `${BASE_URL}/api/admin/${type}/${endpoint}`;
+
+    console.log(`[handleAction] ${method} → ${url}`);
+
     try {
       const formData = new FormData();
       if (method !== "DELETE") {
         Object.keys(body).forEach((key) => {
           let value = body[key];
           if (key === "dailyRate" && value) value = parseFloat(value);
-          if (value !== null && value !== undefined && value !== "") formData.append(key, value);
+          if (value !== null && value !== undefined && value !== "") {
+            formData.append(key, value);
+          }
         });
-        if (selectedFile) formData.append("image", selectedFile);
+        if (selectedFile) {
+          formData.append("image", selectedFile);
+          console.log("[handleAction] image attached:", selectedFile.name, selectedFile.size, "bytes");
+        } else {
+          console.log("[handleAction] no image selected");
+        }
       }
-      // Note: Do NOT set Content-Type for FormData - browser adds correct multipart boundary automatically
-      const fetchOptions = {
-        method,
-        headers: getAuthHeaders(),
-      };
+
+      // Do NOT set Content-Type manually — browser sets multipart/form-data + boundary automatically
+      const fetchOptions = { method, headers: getAuthHeaders() };
       if (method !== "DELETE") fetchOptions.body = formData;
+
       const res = await fetch(url, fetchOptions);
-      const json = await res.json();
-      if (!res.ok && (json.sessionExpired || res.status === 401)) {
-        localStorage.removeItem("token"); localStorage.removeItem("user"); localStorage.removeItem("loginTime");
-        window.dispatchEvent(new Event("auth-state-change"));
-        alert("Your session has expired. Please login again."); navigate("/auth"); return;
+
+      // Try to parse JSON — if backend sends non-JSON (e.g. HTML error page), catch it
+      let json;
+      try {
+        json = await res.json();
+      } catch {
+        const text = await res.text().catch(() => "No response body");
+        console.error("[handleAction] Non-JSON response:", text);
+        showToast(`Server error (${res.status}) — check Render logs`, "danger");
+        return;
       }
-      if (json.success) { showToast(`${type} updated successfully!`, "success"); closeModal(); fetchData(); }
-      else showToast(json.message || "Operation failed", "danger");
+
+      console.log(`[handleAction] Response ${res.status}:`, json);
+
+      if (res.status === 401 || json.sessionExpired) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("loginTime");
+        window.dispatchEvent(new Event("auth-state-change"));
+        alert("Your session has expired. Please login again.");
+        navigate("/auth");
+        return;
+      }
+
+      if (json.success) {
+        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} saved successfully!`, "success");
+        closeModal();
+        fetchData();
+      } else {
+        // Show the actual server error message so you can debug it
+        showToast(json.message || `Operation failed (${res.status})`, "danger");
+        console.error("[handleAction] Server rejected:", json);
+      }
     } catch (err) {
-      console.error("Action error:", err);
-      showToast("Server error — check console", "danger");
+      console.error("[handleAction] Network/fetch error:", err);
+      showToast("Network error — is the server running?", "danger");
+    } finally {
+      setLoading(false);
     }
-    finally { setLoading(false); }
   };
 
   const startEdit = (item) => {
