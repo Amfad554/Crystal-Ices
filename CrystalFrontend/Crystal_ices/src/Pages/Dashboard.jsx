@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [editId, setEditId] = useState(null);
   const [toast, setToast] = useState({ show: false, message: "", type: "info" });
+  const [viewItem, setViewItem] = useState(null);
 
   const [stats, setStats] = useState({ PENDING: 0, PROCESSING: 0, COMPLETED: 0, CANCELLED: 0 });
   const [totals, setTotals] = useState({ equipment: 0, staff: 0 });
@@ -154,13 +155,11 @@ const Dashboard = () => {
         }
       }
 
-      // Do NOT set Content-Type manually — browser sets multipart/form-data + boundary automatically
       const fetchOptions = { method, headers: getAuthHeaders() };
       if (method !== "DELETE") fetchOptions.body = formData;
 
       const res = await fetch(url, fetchOptions);
 
-      // Try to parse JSON — if backend sends non-JSON (e.g. HTML error page), catch it
       let json;
       try {
         json = await res.json();
@@ -188,7 +187,6 @@ const Dashboard = () => {
         closeModal();
         fetchData();
       } else {
-        // Show the actual server error message so you can debug it
         showToast(json.message || `Operation failed (${res.status})`, "danger");
         console.error("[handleAction] Server rejected:", json);
       }
@@ -199,6 +197,8 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+
+  const openView = (item) => setViewItem({ ...item, _tab: activeTab });
 
   const startEdit = (item) => {
     setEditId(item.id);
@@ -238,14 +238,12 @@ const Dashboard = () => {
 
   if (!user) return null;
 
-  /* ── Avatar letter ── */
   const initials = user.name.charAt(0).toUpperCase();
 
   return (
     <Layout>
       <div style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }} className="flex h-screen overflow-hidden bg-[#0C0F1A] text-white relative">
 
-        {/* ── Google Fonts ── */}
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
 
@@ -268,17 +266,9 @@ const Dashboard = () => {
             50%      { box-shadow: 0 0 0 8px rgba(99,179,237,0); }
           }
 
-          .nav-btn {
-            transition: all .2s ease;
-          }
-          .nav-btn:hover:not(.active) {
-            background: rgba(255,255,255,0.05);
-            transform: translateX(3px);
-          }
-          .nav-btn.active {
-            background: rgba(99,179,237,0.14);
-            color: #63B3ED;
-          }
+          .nav-btn { transition: all .2s ease; }
+          .nav-btn:hover:not(.active) { background: rgba(255,255,255,0.05); transform: translateX(3px); }
+          .nav-btn.active { background: rgba(99,179,237,0.14); color: #63B3ED; }
 
           .fade-up { animation: fadeUp .35s ease both; }
 
@@ -408,6 +398,20 @@ const Dashboard = () => {
             background: rgba(255,255,255,0.06);
             margin: 8px 0;
           }
+
+          .btn-view {
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(255,255,255,.6);
+            background: rgba(255,255,255,.06);
+            border: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s;
+          }
+          .btn-view:hover { background: rgba(255,255,255,.12); }
         `}</style>
 
         {/* ── Mobile Overlay ── */}
@@ -550,7 +554,6 @@ const Dashboard = () => {
             {activeTab === "profile" && (
               <div className="fade-up" style={{ maxWidth: 680, margin: "0 auto" }}>
                 <div className="glass" style={{ borderRadius: 24, padding: 36 }}>
-                  {/* Avatar row */}
                   <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 32, paddingBottom: 28, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
                     <div style={{
                       width: 88, height: 88, borderRadius: 24, flexShrink: 0,
@@ -594,7 +597,6 @@ const Dashboard = () => {
             {/* ── OVERVIEW ── */}
             {activeTab === "overview" && user.role === "ADMIN" && (
               <div className="fade-up" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                {/* Stat cards */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 16 }}>
                   {Object.entries(stats).map(([key, value]) => {
                     const m = statMeta[key] || { icon: "◉", label: key, bg: "rgba(255,255,255,.05)", accent: "#fff" };
@@ -611,7 +613,6 @@ const Dashboard = () => {
                   })}
                 </div>
 
-                {/* Big cards */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   <div style={{ borderRadius: 22, padding: 32, background: "linear-gradient(135deg,#63B3ED 0%,#4299E1 100%)", color: "#0C0F1A", position: "relative", overflow: "hidden" }}>
                     <div style={{ position: "absolute", right: -20, top: -20, width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,.12)" }} />
@@ -637,7 +638,6 @@ const Dashboard = () => {
             {/* ── TABLES ── */}
             {["inquiries","inventory","staff","subscribers","applications"].includes(activeTab) && (
               <div className="fade-up glass" style={{ borderRadius: 22, overflow: "hidden" }}>
-                {/* Table header */}
                 <div style={{ padding: "20px 24px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: "-.3px" }}>
                     {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
@@ -663,7 +663,6 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Table */}
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
@@ -712,17 +711,21 @@ const Dashboard = () => {
                           </td>
                           <td style={{ padding: "14px 20px", textAlign: "right" }}>
                             {activeTab === "inquiries" ? (
-                              <select value={item.status} onChange={e => handleStatusUpdate(item.id, e.target.value)} className="select-field"
-                                style={{ width: "auto", padding: "6px 32px 6px 12px", fontSize: 12 }}>
-                                <option value="PENDING">PENDING</option>
-                                <option value="PROCESSING">PROCESSING</option>
-                                <option value="COMPLETED">COMPLETED</option>
-                              </select>
+                              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8 }}>
+                                <button className="btn-view" onClick={() => openView(item)}>View</button>
+                                <select value={item.status} onChange={e => handleStatusUpdate(item.id, e.target.value)} className="select-field"
+                                  style={{ width: "auto", padding: "6px 32px 6px 12px", fontSize: 12 }}>
+                                  <option value="PENDING">PENDING</option>
+                                  <option value="PROCESSING">PROCESSING</option>
+                                  <option value="COMPLETED">COMPLETED</option>
+                                </select>
+                              </div>
                             ) : activeTab === "subscribers" ? (
                               <span style={{ fontSize: 11, color: "rgba(255,255,255,.2)", fontWeight: 600, letterSpacing: ".5px" }}>SYSTEM</span>
                             ) : (
                               <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
                                 {["inventory","staff"].includes(activeTab) && <>
+                                  <button className="btn-view" onClick={() => openView(item)}>View</button>
                                   <button onClick={() => startEdit(item)} style={{ fontSize: 12, fontWeight: 700, color: "#63B3ED", background: "rgba(99,179,237,.1)", border: "none", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit", transition: "all .2s" }}
                                     onMouseEnter={e => e.currentTarget.style.background = "rgba(99,179,237,.2)"}
                                     onMouseLeave={e => e.currentTarget.style.background = "rgba(99,179,237,.1)"}>
@@ -736,7 +739,7 @@ const Dashboard = () => {
                                   </button>
                                 </>}
                                 {activeTab === "applications" && (
-                                  <span style={{ fontSize: 11, color: "rgba(255,255,255,.2)", fontWeight: 600 }}>—</span>
+                                  <button className="btn-view" onClick={() => openView(item)}>View</button>
                                 )}
                               </div>
                             )}
@@ -816,7 +819,6 @@ const Dashboard = () => {
                   onChange={e => setForms({ ...forms, equipment: { ...forms.equipment, description: e.target.value } })} />
               </div>
 
-              {/* Upload */}
               <div style={{ border: "1px dashed rgba(255,255,255,.15)", borderRadius: 14, padding: 20, background: "rgba(255,255,255,.02)" }}>
                 <label className="label-text">Equipment Photo</label>
                 {editId && forms.equipment.imageUrl && !selectedFile && (
@@ -882,6 +884,136 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+      {/* ════════════ VIEW DETAIL MODAL ════════════ */}
+      {viewItem && (
+        <div className="modal-overlay" onClick={() => setViewItem(null)}>
+          <div className="modal-box" style={{ maxWidth: 560 }} onClick={e => e.stopPropagation()}>
+
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".8px", color: "rgba(255,255,255,.35)", textTransform: "uppercase", marginBottom: 6 }}>
+                  {viewItem._tab === "inventory" ? "Equipment" :
+                   viewItem._tab === "staff" ? "Staff Member" :
+                   viewItem._tab === "inquiries" ? "Inquiry" :
+                   viewItem._tab === "applications" ? "Application" : "Record"}
+                </div>
+                <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 22, letterSpacing: "-.4px", margin: 0 }}>
+                  {viewItem.name || viewItem.applicantName || viewItem.fullName || "—"}
+                </h2>
+              </div>
+              <button onClick={() => setViewItem(null)} style={{ background: "rgba(255,255,255,.08)", border: "none", borderRadius: 10, width: 36, height: 36, cursor: "pointer", color: "rgba(255,255,255,.6)", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>✕</button>
+            </div>
+
+            {/* Image */}
+            {viewItem.imageUrl && (
+              <div style={{ marginBottom: 24 }}>
+                <img src={viewItem.imageUrl} alt="" style={{ width: "100%", height: 200, objectFit: "cover", borderRadius: 14, border: "1px solid rgba(255,255,255,.1)" }} />
+              </div>
+            )}
+
+            {/* Fields */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+
+              {/* ── EQUIPMENT ── */}
+              {viewItem._tab === "inventory" && (
+                <>
+                  {[
+                    { label: "Category",    value: viewItem.category },
+                    { label: "Brand",       value: viewItem.brand },
+                    { label: "Region",      value: viewItem.region },
+                    { label: "Daily Rate",  value: viewItem.dailyRate ? `₦${Number(viewItem.dailyRate).toLocaleString()}` : null },
+                    { label: "Description", value: viewItem.description },
+                    { label: "Added",       value: viewItem.createdAt ? new Date(viewItem.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : null },
+                  ].map(({ label, value }) => value ? (
+                    <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "13px 0", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".6px", color: "rgba(255,255,255,.35)", textTransform: "uppercase", flexShrink: 0, marginRight: 16 }}>{label}</span>
+                      <span style={{ fontSize: 14, color: "rgba(255,255,255,.85)", textAlign: "right", lineHeight: 1.5 }}>{value}</span>
+                    </div>
+                  ) : null)}
+                </>
+              )}
+
+              {/* ── STAFF ── */}
+              {viewItem._tab === "staff" && (
+                <>
+                  {[
+                    { label: "Role",      value: viewItem.role },
+                    { label: "Specialty", value: viewItem.specialty },
+                    { label: "Added",     value: viewItem.createdAt ? new Date(viewItem.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : null },
+                  ].map(({ label, value }) => value ? (
+                    <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "13px 0", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".6px", color: "rgba(255,255,255,.35)", textTransform: "uppercase", flexShrink: 0, marginRight: 16 }}>{label}</span>
+                      <span style={{ fontSize: 14, color: "rgba(255,255,255,.85)", textAlign: "right" }}>{value}</span>
+                    </div>
+                  ) : null)}
+                </>
+              )}
+
+              {/* ── INQUIRY ── */}
+              {viewItem._tab === "inquiries" && (
+                <>
+                  {[
+                    { label: "Email",     value: viewItem.email },
+                    { label: "Phone",     value: viewItem.phone },
+                    { label: "Company",   value: viewItem.company },
+                    { label: "Equipment", value: viewItem.equipmentType || viewItem.equipment },
+                    { label: "Message",   value: viewItem.message },
+                    { label: "Status",    value: viewItem.status, isStatus: true },
+                    { label: "Submitted", value: viewItem.createdAt ? new Date(viewItem.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : null },
+                  ].map(({ label, value, isStatus }) => value ? (
+                    <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "13px 0", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".6px", color: "rgba(255,255,255,.35)", textTransform: "uppercase", flexShrink: 0, marginRight: 16 }}>{label}</span>
+                      {isStatus ? (
+                        <span className="status-pill" style={{ background: `${statusColor(value)}22`, color: statusColor(value) }}>{value}</span>
+                      ) : (
+                        <span style={{ fontSize: 14, color: "rgba(255,255,255,.85)", textAlign: "right", maxWidth: "65%", lineHeight: 1.5 }}>{value}</span>
+                      )}
+                    </div>
+                  ) : null)}
+                </>
+              )}
+
+              {/* ── APPLICATION ── */}
+              {viewItem._tab === "applications" && (
+                <>
+                  {[
+                    { label: "Applicant",    value: viewItem.applicantName },
+                    { label: "Email",        value: viewItem.applicantEmail },
+                    { label: "Phone",        value: viewItem.applicantPhone || viewItem.phone },
+                    { label: "Role Applied", value: viewItem.roleApplied || viewItem.role },
+                    { label: "Experience",   value: viewItem.experience },
+                    { label: "Cover Letter", value: viewItem.coverLetter || viewItem.message },
+                    { label: "Submitted",    value: viewItem.createdAt ? new Date(viewItem.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : null },
+                  ].map(({ label, value }) => value ? (
+                    <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "13px 0", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".6px", color: "rgba(255,255,255,.35)", textTransform: "uppercase", flexShrink: 0, marginRight: 16 }}>{label}</span>
+                      <span style={{ fontSize: 14, color: "rgba(255,255,255,.85)", textAlign: "right", maxWidth: "65%", lineHeight: 1.5 }}>{value}</span>
+                    </div>
+                  ) : null)}
+                </>
+              )}
+
+            </div>
+
+            {/* Bottom buttons */}
+            {["inventory","staff"].includes(viewItem._tab) ? (
+              <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+                <button className="btn-primary" style={{ flex: 1, padding: "13px 24px" }}
+                  onClick={() => { setViewItem(null); startEdit(viewItem); }}>
+                  Edit this record
+                </button>
+                <button className="btn-ghost" style={{ flex: 1 }} onClick={() => setViewItem(null)}>Close</button>
+              </div>
+            ) : (
+              <button className="btn-primary" style={{ width: "100%", marginTop: 24, padding: "13px 24px" }} onClick={() => setViewItem(null)}>Close</button>
+            )}
+
+          </div>
+        </div>
+      )}
+
     </Layout>
   );
 };
