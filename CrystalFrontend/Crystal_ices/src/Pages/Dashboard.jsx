@@ -9,10 +9,10 @@ const statusColor = (s) =>
   ({ PENDING: "#F59E0B", PROCESSING: "#3B82F6", COMPLETED: "#10B981", CANCELLED: "#EF4444" }[s] || "#94A3B8");
 
 const statMeta = {
-  PENDING: { icon: "⏳", label: "Pending", bg: "rgba(245,158,11,0.12)", accent: "#F59E0B" },
-  PROCESSING: { icon: "⚙️", label: "Processing", bg: "rgba(59,130,246,0.12)", accent: "#3B82F6" },
-  COMPLETED: { icon: "✅", label: "Completed", bg: "rgba(16,185,129,0.12)", accent: "#10B981" },
-  CANCELLED: { icon: "🚫", label: "Cancelled", bg: "rgba(239,68,68,0.12)", accent: "#EF4444" },
+  PENDING:    { icon: "⏳", label: "Pending",    bg: "rgba(245,158,11,0.12)",  accent: "#F59E0B" },
+  PROCESSING: { icon: "⚙️",  label: "Processing", bg: "rgba(59,130,246,0.12)", accent: "#3B82F6" },
+  COMPLETED:  { icon: "✅",  label: "Completed",  bg: "rgba(16,185,129,0.12)", accent: "#10B981" },
+  CANCELLED:  { icon: "🚫",  label: "Cancelled",  bg: "rgba(239,68,68,0.12)",  accent: "#EF4444" },
 };
 
 /* ─── component ─────────────────────────────────────────────────── */
@@ -161,20 +161,20 @@ const Dashboard = () => {
   };
 
   const menuItems = [
-    { id: "overview", label: "Overview", icon: "▦", roles: ["ADMIN"] },
-    { id: "inquiries", label: user?.role === "CLIENT" ? "My Requests" : "Inquiries", icon: "◎", roles: ["ADMIN", "STAFF", "CLIENT"] },
-    { id: "inventory", label: "Equipment", icon: "⬡", roles: ["ADMIN", "STAFF"] },
-    { id: "staff", label: "Personnel", icon: "◈", roles: ["ADMIN"] },
-    { id: "applications", label: "Applications", icon: "◻", roles: ["ADMIN"] },
-    { id: "subscribers", label: "Subscribers", icon: "◉", roles: ["ADMIN", "STAFF"] },
-    { id: "profile", label: "My Profile", icon: "○", roles: ["ADMIN", "STAFF", "CLIENT"] },
+    { id: "overview",      label: "Overview",         icon: "▦",  roles: ["ADMIN"] },
+    { id: "inquiries",     label: user?.role === "CLIENT" ? "My Requests" : "Inquiries", icon: "◎", roles: ["ADMIN","STAFF","CLIENT"] },
+    { id: "inventory",     label: "Equipment",        icon: "⬡",  roles: ["ADMIN","STAFF"] },
+    { id: "staff",         label: "Personnel",        icon: "◈",  roles: ["ADMIN"] },
+    { id: "applications",  label: "Applications",     icon: "◻",  roles: ["ADMIN"] },
+    { id: "subscribers",   label: "Subscribers",      icon: "◉",  roles: ["ADMIN","STAFF"] },
+    { id: "profile",       label: "My Profile",       icon: "○",  roles: ["ADMIN","STAFF","CLIENT"] },
   ];
 
   const tableData =
     activeTab === "inventory" ? equipment :
-      activeTab === "staff" ? staff :
-        activeTab === "subscribers" ? subscribers :
-          activeTab === "applications" ? applications : inquiries;
+    activeTab === "staff"     ? staff :
+    activeTab === "subscribers" ? subscribers :
+    activeTab === "applications" ? applications : inquiries;
 
   const filtered = tableData.filter((item) =>
     (item.name || item.fullName || item.email || item.applicantName || "")
@@ -188,11 +188,11 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div style={{ fontFamily: "'DM Sans', 'Syne', sans-serif" }} className="flex h-screen overflow-hidden bg-[#0C0F1A] text-white relative">
+      <div style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }} className="flex h-screen overflow-hidden bg-[#0C0F1A] text-white relative">
 
         {/* ── Google Fonts ── */}
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
 
           * { box-sizing: border-box; }
 
@@ -380,11 +380,11 @@ const Dashboard = () => {
                 width: 42, height: 42, borderRadius: 14,
                 background: "linear-gradient(135deg,#63B3ED,#4299E1)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, color: "#0C0F1A",
+                fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 20, color: "#0C0F1A",
                 boxShadow: "0 8px 20px rgba(99,179,237,.3)",
               }}>C</div>
               <div>
-                <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 16, letterSpacing: "-.3px" }}>Crystal</div>
+                <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 16, letterSpacing: "-.3px" }}>Crystal</div>
                 <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)", fontWeight: 500, marginTop: 1 }}>Industrial Portal</div>
               </div>
               <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden" style={{ marginLeft: "auto", color: "rgba(255,255,255,.4)", fontSize: 20, background: "none", border: "none", cursor: "pointer" }}>✕</button>
@@ -398,7 +398,7 @@ const Dashboard = () => {
                 width: 40, height: 40, borderRadius: 12, flexShrink: 0,
                 background: "linear-gradient(135deg,#63B3ED,#4299E1)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, color: "#0C0F1A",
+                fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 18, color: "#0C0F1A",
               }}>{initials}</div>
               <div style={{ overflow: "hidden" }}>
                 <div style={{ fontWeight: 700, fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}</div>
@@ -463,10 +463,10 @@ const Dashboard = () => {
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
               <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, padding: "8px 10px", cursor: "pointer", color: "rgba(255,255,255,.7)" }}>
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
               </button>
               <div>
-                <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 22, letterSpacing: "-.4px", lineHeight: 1 }}>
+                <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 22, letterSpacing: "-.4px", lineHeight: 1 }}>
                   {activeTab === "inventory" ? "Equipment" : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
                 </h2>
                 <p style={{ fontSize: 12, color: "rgba(255,255,255,.3)", fontWeight: 500, marginTop: 3 }}>
@@ -501,14 +501,14 @@ const Dashboard = () => {
                       width: 88, height: 88, borderRadius: 24, flexShrink: 0,
                       background: "linear-gradient(135deg,#63B3ED,#4299E1)",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 36, color: "#0C0F1A",
+                      fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 36, color: "#0C0F1A",
                       boxShadow: "0 12px 30px rgba(99,179,237,.3)",
                     }}>{initials}</div>
                     <div>
-                      <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 26, letterSpacing: "-.5px", lineHeight: 1.1 }}>{user.name}</div>
+                      <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 26, letterSpacing: "-.5px", lineHeight: 1.1 }}>{user.name}</div>
                       <div style={{ color: "rgba(255,255,255,.45)", fontSize: 13, marginTop: 6 }}>{user.role} · {user.email}</div>
                       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                        {["Active", "Verified"].map(t => (
+                        {["Active","Verified"].map(t => (
                           <span key={t} style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99, background: "rgba(99,179,237,.14)", color: "#63B3ED", letterSpacing: ".4px" }}>{t}</span>
                         ))}
                       </div>
@@ -549,7 +549,7 @@ const Dashboard = () => {
                           <span style={{ fontSize: 22 }}>{m.icon}</span>
                           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".7px", color: m.accent, background: `rgba(${m.accent === "#F59E0B" ? "245,158,11" : m.accent === "#3B82F6" ? "59,130,246" : m.accent === "#10B981" ? "16,185,129" : "239,68,68"},.15)`, padding: "3px 10px", borderRadius: 99 }}>{m.label}</span>
                         </div>
-                        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 40, lineHeight: 1, position: "relative", zIndex: 1 }}>{value}</div>
+                        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 40, lineHeight: 1, position: "relative", zIndex: 1 }}>{value}</div>
                         <div style={{ fontSize: 12, color: "rgba(255,255,255,.35)", marginTop: 6, position: "relative", zIndex: 1 }}>Total inquiries</div>
                       </div>
                     );
@@ -563,7 +563,7 @@ const Dashboard = () => {
                     <div style={{ position: "absolute", right: 30, bottom: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,.08)" }} />
                     <div style={{ position: "relative", zIndex: 1 }}>
                       <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".8px", opacity: .7, marginBottom: 8 }}>FLEET ASSETS</div>
-                      <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 64, lineHeight: 1 }}>{totals.equipment}</div>
+                      <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 64, lineHeight: 1 }}>{totals.equipment}</div>
                       <div style={{ fontSize: 13, opacity: .7, marginTop: 10 }}>Equipment in inventory</div>
                     </div>
                   </div>
@@ -571,7 +571,7 @@ const Dashboard = () => {
                     <div style={{ position: "absolute", right: -20, top: -20, width: 120, height: 120, borderRadius: "50%", background: "rgba(99,179,237,.06)" }} />
                     <div style={{ position: "relative", zIndex: 1 }}>
                       <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".8px", color: "rgba(255,255,255,.4)", marginBottom: 8 }}>PERSONNEL</div>
-                      <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 64, lineHeight: 1 }}>{totals.staff}</div>
+                      <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 64, lineHeight: 1 }}>{totals.staff}</div>
                       <div style={{ fontSize: 13, color: "rgba(255,255,255,.4)", marginTop: 10 }}>Active staff members</div>
                     </div>
                   </div>
@@ -580,11 +580,11 @@ const Dashboard = () => {
             )}
 
             {/* ── TABLES ── */}
-            {["inquiries", "inventory", "staff", "subscribers", "applications"].includes(activeTab) && (
+            {["inquiries","inventory","staff","subscribers","applications"].includes(activeTab) && (
               <div className="fade-up glass" style={{ borderRadius: 22, overflow: "hidden" }}>
                 {/* Table header */}
                 <div style={{ padding: "20px 24px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: "-.3px" }}>
+                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: "-.3px" }}>
                     {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
                     <span style={{ marginLeft: 10, fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,.3)" }}>{filtered.length} records</span>
                   </div>
@@ -594,11 +594,11 @@ const Dashboard = () => {
                         onChange={e => setSearch(e.target.value)} />
                       <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 14, color: "rgba(255,255,255,.3)" }}>⌕</span>
                     </div>
-                    {["inventory", "staff"].includes(activeTab) && (
+                    {["inventory","staff"].includes(activeTab) && (
                       <button className="btn-primary"
                         onClick={() => {
                           setEditId(null); setSelectedFile(null);
-                          setForms({ equipment: { name: "", category: "Heavy Duty", brand: "", dailyRate: "", region: "Lagos", description: "" }, staff: { name: "", role: "", specialty: "" } });
+                          setForms({ equipment: { name:"",category:"Heavy Duty",brand:"",dailyRate:"",region:"Lagos",description:"" }, staff: { name:"",role:"",specialty:"" } });
                           setModals({ ...modals, [activeTab === "inventory" ? "equipment" : "staff"]: true });
                         }}
                         style={{ padding: "10px 20px", fontSize: 13 }}>
@@ -667,7 +667,7 @@ const Dashboard = () => {
                               <span style={{ fontSize: 11, color: "rgba(255,255,255,.2)", fontWeight: 600, letterSpacing: ".5px" }}>SYSTEM</span>
                             ) : (
                               <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-                                {["inventory", "staff"].includes(activeTab) && <>
+                                {["inventory","staff"].includes(activeTab) && <>
                                   <button onClick={() => startEdit(item)} style={{ fontSize: 12, fontWeight: 700, color: "#63B3ED", background: "rgba(99,179,237,.1)", border: "none", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontFamily: "inherit", transition: "all .2s" }}
                                     onMouseEnter={e => e.currentTarget.style.background = "rgba(99,179,237,.2)"}
                                     onMouseLeave={e => e.currentTarget.style.background = "rgba(99,179,237,.1)"}>
@@ -703,8 +703,8 @@ const Dashboard = () => {
             padding: "14px 22px", borderRadius: 14, fontWeight: 700, fontSize: 13, letterSpacing: ".3px",
             animation: "toastIn .3s ease",
             background: toast.type === "danger" ? "linear-gradient(135deg,#FC8181,#E53E3E)" :
-              toast.type === "success" ? "linear-gradient(135deg,#68D391,#38A169)" :
-                "linear-gradient(135deg,#63B3ED,#4299E1)",
+                        toast.type === "success" ? "linear-gradient(135deg,#68D391,#38A169)" :
+                        "linear-gradient(135deg,#63B3ED,#4299E1)",
             color: toast.type === "info" ? "#0C0F1A" : "white",
             boxShadow: "0 12px 30px rgba(0,0,0,.4)",
           }}>
@@ -717,7 +717,7 @@ const Dashboard = () => {
       {modals.equipment && (
         <div className="modal-overlay">
           <div className="modal-box">
-            <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 24, marginBottom: 24, letterSpacing: "-.4px" }}>
+            <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 24, marginBottom: 24, letterSpacing: "-.4px" }}>
               {editId ? "Update" : "Add"} Equipment
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -796,7 +796,7 @@ const Dashboard = () => {
       {modals.staff && (
         <div className="modal-overlay">
           <div className="modal-box" style={{ maxWidth: 480 }}>
-            <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 24, marginBottom: 24, letterSpacing: "-.4px" }}>
+            <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: 24, marginBottom: 24, letterSpacing: "-.4px" }}>
               {editId ? "Update" : "Add"} Staff Member
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
