@@ -71,7 +71,14 @@ const Dashboard = () => {
         subscribers: "api/users/newsletter-all",
         applications: "api/users/applications/all",
       };
-      const res = await fetch(`${BASE_URL}/${endpoints[activeTab]}`);
+      const res = await fetch(`${BASE_URL}/${endpoints[activeTab]}`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.status === 401) {
+        localStorage.removeItem("token"); localStorage.removeItem("user"); localStorage.removeItem("loginTime");
+        window.dispatchEvent(new Event("auth-state-change"));
+        navigate("/auth"); return;
+      }
       const json = await res.json();
       if (json.success) {
         if (activeTab === "overview") { setStats(json.stats); setTotals(json.totals); }
@@ -80,8 +87,10 @@ const Dashboard = () => {
         else if (activeTab === "inquiries") setInquiries(json.data);
         else if (activeTab === "subscribers") setSubscribers(json.data);
         else if (activeTab === "applications") setApplications(json.data);
+      } else {
+        showToast(json.message || "Failed to load data", "danger");
       }
-    } catch { showToast("Failed to sync with database", "danger"); }
+    } catch (err) { console.error("Fetch error:", err); showToast("Failed to connect to server", "danger"); }
     setLoading(false);
   };
 
@@ -92,7 +101,7 @@ const Dashboard = () => {
     try {
       const res = await fetch(`${BASE_URL}/api/users/update-profile/${user.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ name: profileData.name, email: profileData.email }),
       });
       const json = await res.json();
@@ -110,11 +119,13 @@ const Dashboard = () => {
     try {
       const res = await fetch(`${BASE_URL}/api/inquiry/status/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (res.ok) { showToast("Status updated"); fetchData(); }
-    } catch { showToast("Update failed", "danger"); }
+      const json = await res.json();
+      if (res.ok && json.success) { showToast("Status updated", "success"); fetchData(); }
+      else showToast(json.message || "Update failed", "danger");
+    } catch (err) { console.error(err); showToast("Update failed", "danger"); }
   };
 
   const handleAction = async (type, method, body = null, id = "") => {
@@ -132,7 +143,13 @@ const Dashboard = () => {
         });
         if (selectedFile) formData.append("image", selectedFile);
       }
-      const res = await fetch(url, { method, headers: getAuthHeaders(), body: method === "DELETE" ? null : formData });
+      // Note: Do NOT set Content-Type for FormData - browser adds correct multipart boundary automatically
+      const fetchOptions = {
+        method,
+        headers: getAuthHeaders(),
+      };
+      if (method !== "DELETE") fetchOptions.body = formData;
+      const res = await fetch(url, fetchOptions);
       const json = await res.json();
       if (!res.ok && (json.sessionExpired || res.status === 401)) {
         localStorage.removeItem("token"); localStorage.removeItem("user"); localStorage.removeItem("loginTime");
@@ -141,7 +158,10 @@ const Dashboard = () => {
       }
       if (json.success) { showToast(`${type} updated successfully!`, "success"); closeModal(); fetchData(); }
       else showToast(json.message || "Operation failed", "danger");
-    } catch { showToast("Server error", "danger"); }
+    } catch (err) {
+      console.error("Action error:", err);
+      showToast("Server error — check console", "danger");
+    }
     finally { setLoading(false); }
   };
 
