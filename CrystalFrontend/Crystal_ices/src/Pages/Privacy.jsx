@@ -38,7 +38,7 @@ const Privacy = () => {
           <div className="max-w-4xl mx-auto">
             <div className="prose prose-slate max-w-none">
               <p className="text-gray-600 mb-10 leading-relaxed text-lg">
-                At **Crystal Ices Energies Nigeria Limited**, we value your privacy. This policy 
+                At Crystal Ices Energies Nigeria Limited, we value your privacy. This policy 
                 outlines how we handle information collected through our website and 
                 corporate operations.
               </p>
